@@ -22,7 +22,6 @@ export function MemberForm({ member, onSubmit, onCancel }: MemberFormProps) {
     },
   });
 
-  const name = watch('name');
   const selectedColor = watch('color');
 
   // Auto-generate initials from name
