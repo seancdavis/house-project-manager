@@ -1,15 +1,42 @@
-import { useState } from 'react';
-import { Plus, FolderKanban, CheckCircle2 } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Plus, FolderKanban, CheckCircle2, Filter, ArrowUpDown, X } from 'lucide-react';
 import { useProjects, useCreateProject } from '../hooks/useProjects';
+import { useMembers } from '../hooks/useMembers';
+import { useProjectFilters } from '../hooks/useUrlState';
 import { ProjectCard } from '../components/projects/ProjectCard';
 import { ProjectForm } from '../components/projects/ProjectForm';
-import { Card, EmptyState, Modal, PageLoading, RequireAuthButton } from '../components/ui';
-import type { ProjectInput } from '../types';
+import { Card, EmptyState, Modal, PageLoading, RequireAuthButton, Button, Select } from '../components/ui';
+import type { ProjectInput, Project } from '../types';
+
+const STATUS_OPTIONS = [
+  { value: '', label: 'All Statuses' },
+  { value: 'not_started', label: 'Not Started' },
+  { value: 'in_progress', label: 'In Progress' },
+  { value: 'on_hold', label: 'On Hold' },
+  { value: 'completed', label: 'Completed' },
+];
+
+const TYPE_OPTIONS = [
+  { value: '', label: 'All Types' },
+  { value: 'diy', label: 'DIY' },
+  { value: 'contractor', label: 'Contractor' },
+  { value: 'handyman', label: 'Handyman' },
+];
+
+const SORT_OPTIONS = [
+  { value: 'createdAt', label: 'Date Created' },
+  { value: 'updatedAt', label: 'Last Updated' },
+  { value: 'title', label: 'Title' },
+  { value: 'targetDate', label: 'Target Date' },
+];
 
 export function ProjectsPage() {
   const { data: projects, isLoading, error } = useProjects();
+  const { data: members } = useMembers();
   const createProject = useCreateProject();
   const [showForm, setShowForm] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters, resetFilters] = useProjectFilters();
 
   const handleCreate = (data: ProjectInput) => {
     createProject.mutate(data, {
@@ -17,11 +44,54 @@ export function ProjectsPage() {
     });
   };
 
+  // Filter and sort projects
+  const filteredProjects = useMemo(() => {
+    if (!projects) return [];
+
+    let result = [...projects];
+
+    // Apply filters
+    if (filters.status) {
+      result = result.filter(p => p.status === filters.status);
+    }
+    if (filters.type) {
+      result = result.filter(p => p.type === filters.type);
+    }
+    if (filters.owner) {
+      result = result.filter(p => p.ownerId === filters.owner);
+    }
+
+    // Apply sorting
+    const sortKey = filters.sort || 'createdAt';
+    const sortOrder = filters.order || 'desc';
+
+    result.sort((a, b) => {
+      let aVal = a[sortKey as keyof Project];
+      let bVal = b[sortKey as keyof Project];
+
+      // Handle null values
+      if (aVal === null) aVal = '';
+      if (bVal === null) bVal = '';
+
+      // Compare
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
+        const comparison = aVal.localeCompare(bVal);
+        return sortOrder === 'asc' ? comparison : -comparison;
+      }
+      return 0;
+    });
+
+    return result;
+  }, [projects, filters]);
+
+  const activeFiltersCount = [filters.status, filters.type, filters.owner].filter(Boolean).length;
+
   if (isLoading) return <PageLoading />;
   if (error) return <div>Error: {error.message}</div>;
 
-  const activeProjects = projects?.filter(p => p.status !== 'completed') || [];
-  const completedProjects = projects?.filter(p => p.status === 'completed') || [];
+  const familyMembers = members?.filter(m => m.type === 'family') || [];
+  const activeProjects = filteredProjects.filter(p => p.status !== 'completed');
+  const completedProjects = filteredProjects.filter(p => p.status === 'completed');
 
   return (
     <div className="animate-fade-in">
@@ -31,7 +101,7 @@ export function ProjectsPage() {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'flex-start',
-          marginBottom: '32px',
+          marginBottom: '24px',
         }}
       >
         <div>
@@ -45,22 +115,152 @@ export function ProjectsPage() {
         </RequireAuthButton>
       </div>
 
+      {/* Filter Bar */}
+      <Card style={{ marginBottom: '24px' }} padding="sm">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          <Button
+            variant={showFilters ? 'primary' : 'secondary'}
+            size="sm"
+            onClick={() => setShowFilters(!showFilters)}
+            icon={<Filter size={16} />}
+          >
+            Filters
+            {activeFiltersCount > 0 && (
+              <span
+                style={{
+                  marginLeft: '6px',
+                  padding: '2px 8px',
+                  backgroundColor: 'var(--color-primary-100)',
+                  color: 'var(--color-primary-700)',
+                  borderRadius: 'var(--radius-full)',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                }}
+              >
+                {activeFiltersCount}
+              </span>
+            )}
+          </Button>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <ArrowUpDown size={16} color="var(--color-stone-400)" />
+            <Select
+              value={filters.sort || 'createdAt'}
+              onChange={(e) => setFilters({ sort: e.target.value })}
+              style={{ minWidth: '140px', padding: '6px 32px 6px 10px', fontSize: '0.875rem' }}
+            >
+              {SORT_OPTIONS.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </Select>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setFilters({ order: filters.order === 'asc' ? 'desc' : 'asc' })}
+              style={{ padding: '6px 10px' }}
+            >
+              {filters.order === 'asc' ? 'A-Z' : 'Z-A'}
+            </Button>
+          </div>
+
+          {activeFiltersCount > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={resetFilters}
+              icon={<X size={14} />}
+              style={{ marginLeft: 'auto' }}
+            >
+              Clear filters
+            </Button>
+          )}
+        </div>
+
+        {/* Expanded Filters */}
+        {showFilters && (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '12px',
+              marginTop: '16px',
+              paddingTop: '16px',
+              borderTop: '1px solid var(--color-stone-100)',
+            }}
+          >
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8125rem', color: 'var(--color-stone-500)', marginBottom: '4px' }}>
+                Status
+              </label>
+              <Select
+                value={filters.status || ''}
+                onChange={(e) => setFilters({ status: e.target.value || undefined })}
+                style={{ fontSize: '0.875rem' }}
+              >
+                {STATUS_OPTIONS.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </Select>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8125rem', color: 'var(--color-stone-500)', marginBottom: '4px' }}>
+                Type
+              </label>
+              <Select
+                value={filters.type || ''}
+                onChange={(e) => setFilters({ type: e.target.value || undefined })}
+                style={{ fontSize: '0.875rem' }}
+              >
+                {TYPE_OPTIONS.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </Select>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8125rem', color: 'var(--color-stone-500)', marginBottom: '4px' }}>
+                Owner
+              </label>
+              <Select
+                value={filters.owner || ''}
+                onChange={(e) => setFilters({ owner: e.target.value || undefined })}
+                style={{ fontSize: '0.875rem' }}
+              >
+                <option value="">All Owners</option>
+                {familyMembers.map(member => (
+                  <option key={member.id} value={member.id}>{member.name}</option>
+                ))}
+              </Select>
+            </div>
+          </div>
+        )}
+      </Card>
+
       {/* Modal for new project */}
       <Modal isOpen={showForm} onClose={() => setShowForm(false)} title="New Project" size="md">
         <ProjectForm onSubmit={handleCreate} onCancel={() => setShowForm(false)} />
       </Modal>
 
       {/* Empty State */}
-      {activeProjects.length === 0 && completedProjects.length === 0 && (
+      {filteredProjects.length === 0 && (
         <Card>
           <EmptyState
             icon={<FolderKanban size={28} />}
-            title="No projects yet"
-            description="Create your first project to start tracking your home improvements"
+            title={activeFiltersCount > 0 ? "No matching projects" : "No projects yet"}
+            description={activeFiltersCount > 0
+              ? "Try adjusting your filters to see more results"
+              : "Create your first project to start tracking your home improvements"}
             action={
-              <RequireAuthButton onClick={() => setShowForm(true)} icon={<Plus size={16} />}>
-                Create Project
-              </RequireAuthButton>
+              activeFiltersCount > 0 ? (
+                <Button variant="secondary" onClick={resetFilters}>
+                  Clear filters
+                </Button>
+              ) : (
+                <RequireAuthButton onClick={() => setShowForm(true)} icon={<Plus size={16} />}>
+                  Create Project
+                </RequireAuthButton>
+              )
             }
           />
         </Card>

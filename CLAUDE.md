@@ -47,7 +47,20 @@ Use Lucide React for all icons. Import from `lucide-react`.
 
 ### URL-based State
 
-**IMPORTANT**: Any action that adjusts a view (sorting, filtering) should result in a URL change so it can be shared and bookmarked. Use React Router's `useSearchParams` for query parameters.
+**IMPORTANT**: Any action that adjusts a view (sorting, filtering) should result in a URL change so it can be shared and bookmarked.
+
+Use the `useUrlState` hook from `src/hooks/useUrlState.ts`:
+```tsx
+const [filters, setFilters, resetFilters] = useProjectFilters();
+// filters.status, filters.type, filters.owner, filters.sort, filters.order, filters.view
+// setFilters({ status: 'in_progress' }) // updates URL with ?status=in_progress
+// resetFilters() // clears all filters
+```
+
+Available hooks:
+- `useProjectFilters()` - For project list filtering/sorting
+- `useMemberFilters()` - For member list filtering/sorting
+- `useUrlState(defaults)` - Generic hook for custom URL state
 
 ### User Context & Authentication
 
