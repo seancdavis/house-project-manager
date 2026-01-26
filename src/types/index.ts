@@ -76,6 +76,31 @@ export interface Note {
   author?: Member; // Populated from join
 }
 
+export type ActivityAction = 'created' | 'updated' | 'deleted' | 'completed';
+export type ActivityEntityType = 'project' | 'task' | 'member' | 'note' | 'photo';
+
+export interface Activity {
+  id: string;
+  action: ActivityAction;
+  entityType: ActivityEntityType;
+  entityId: string | null;
+  entityTitle: string | null;
+  projectId: string | null;
+  actorId: string | null;
+  metadata: string | null;
+  createdAt: string;
+  actor?: {
+    id: string;
+    name: string;
+    initials: string;
+    color: string;
+  } | null;
+  project?: {
+    id: string;
+    title: string;
+  } | null;
+}
+
 // Form input types (without generated fields)
 export interface MemberInput {
   name: string;

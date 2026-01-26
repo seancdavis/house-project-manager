@@ -168,6 +168,35 @@ The MemberForm includes an enhanced color picker with:
 
 Colors are stored as hex values (e.g., `#B45309`).
 
+### Activity Feed
+
+The activity feed tracks CRUD operations across the application. The `activities` table stores:
+- `action`: 'created' | 'updated' | 'deleted' | 'completed'
+- `entityType`: 'project' | 'task' | 'member' | 'note' | 'photo'
+- `entityId`, `entityTitle`: Reference to the affected item
+- `projectId`: Related project (for project-scoped activities)
+- `actorId`: Who performed the action
+
+To log an activity from a mutation:
+```typescript
+import { useCreateActivity } from '../hooks/useActivities';
+
+const createActivity = useCreateActivity();
+createActivity.mutate({
+  action: 'created',
+  entityType: 'project',
+  entityId: newProject.id,
+  entityTitle: newProject.title,
+  actorId: currentUser?.id,
+});
+```
+
+The `ActivityFeed` component displays recent activities with:
+- Relative timestamps
+- Actor avatars
+- Action icons with color-coded badges
+- Links to related projects
+
 ## File Naming Conventions
 
 - Pages: PascalCase in `src/pages/` (e.g., `ProjectDetail.tsx`)

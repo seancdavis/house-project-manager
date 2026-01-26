@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
-import { FolderKanban, Clock, CheckCircle2, AlertCircle, Plus, Users, ArrowRight } from 'lucide-react';
+import { FolderKanban, Clock, CheckCircle2, AlertCircle, Plus, Users, ArrowRight, Activity } from 'lucide-react';
 import { useProjects } from '../hooks/useProjects';
 import { useMembers } from '../hooks/useMembers';
 import { ProjectCard } from '../components/projects/ProjectCard';
+import { ActivityFeed } from '../components/activities/ActivityFeed';
 import { useCurrentUser } from '../context/UserContext';
 import { Card, Button, EmptyState, PageLoading } from '../components/ui';
 
@@ -300,6 +301,34 @@ export function DashboardPage() {
           />
         </Card>
       )}
+
+      {/* Activity Feed */}
+      <div style={{ marginTop: '40px' }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          marginBottom: '16px',
+        }}>
+          <div
+            style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: 'var(--radius-md)',
+              backgroundColor: 'var(--color-primary-50)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Activity size={18} color="var(--color-primary-600)" />
+          </div>
+          <h2 style={{ fontSize: '1.25rem' }}>Recent Activity</h2>
+        </div>
+        <Card>
+          <ActivityFeed limit={15} />
+        </Card>
+      </div>
     </div>
   );
 }

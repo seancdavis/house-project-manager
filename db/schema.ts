@@ -77,3 +77,16 @@ export const notes = pgTable('notes', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
+
+// Activity feed for tracking all CRUD operations
+export const activities = pgTable('activities', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  action: text('action').notNull(), // 'created' | 'updated' | 'deleted' | 'completed'
+  entityType: text('entity_type').notNull(), // 'project' | 'task' | 'member' | 'note' | 'photo'
+  entityId: uuid('entity_id'), // ID of the entity (nullable for deleted items)
+  entityTitle: text('entity_title'), // Title/name for display
+  projectId: uuid('project_id').references(() => projects.id, { onDelete: 'set null' }), // Related project if applicable
+  actorId: uuid('actor_id').references(() => members.id, { onDelete: 'set null' }), // Who performed the action
+  metadata: text('metadata'), // JSON string for additional data
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
