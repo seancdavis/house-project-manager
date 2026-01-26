@@ -40,3 +40,13 @@ export function useDeleteTask(projectId: string) {
     },
   });
 }
+
+export function useReorderTasks(projectId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (taskIds: string[]) => api.reorderTasks(taskIds),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks', projectId] });
+    },
+  });
+}

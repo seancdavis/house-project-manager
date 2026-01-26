@@ -27,15 +27,28 @@ export default async (req: Request, context: Context) => {
 
   if (req.method === 'PUT') {
     const body = await req.json();
+
+    // Build update object with only provided fields
+    const updateData: Record<string, unknown> = {
+      updatedAt: new Date(),
+    };
+
+    if (body.title !== undefined) {
+      updateData.title = body.title;
+    }
+    if (body.status !== undefined) {
+      updateData.status = body.status;
+      updateData.completedAt = body.status === 'done' ? new Date() : null;
+    }
+    if (body.assigneeId !== undefined) {
+      updateData.assigneeId = body.assigneeId;
+    }
+    if (body.sortOrder !== undefined) {
+      updateData.sortOrder = body.sortOrder;
+    }
+
     const [updated] = await db.update(tasks)
-      .set({
-        title: body.title,
-        status: body.status,
-        assigneeId: body.assigneeId,
-        sortOrder: body.sortOrder,
-        updatedAt: new Date(),
-        completedAt: body.status === 'done' ? new Date() : null,
-      })
+      .set(updateData)
       .where(eq(tasks.id, id))
       .returning();
 

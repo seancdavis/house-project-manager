@@ -20,3 +20,7 @@ export function updateTask(id: string, data: Partial<TaskInput>): Promise<Task> 
 export function deleteTask(id: string): Promise<{ success: boolean }> {
   return del<{ success: boolean }>(`/tasks/${id}`);
 }
+
+export function reorderTasks(taskIds: string[]): Promise<{ success: boolean }> {
+  return put<{ success: boolean }>('/tasks/reorder', { taskIds });
+}

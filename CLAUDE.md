@@ -149,6 +149,16 @@ Use the `useNotes` hooks:
 
 Users can only edit/delete their own notes. The `NotesSection` component handles display and CRUD operations.
 
+### Tasks
+
+Tasks are ordered by `sortOrder` field. The TaskList component supports:
+- **Inline editing**: Click on task title to edit, press Enter to save or Escape to cancel
+- **Reordering**: Use up/down arrows to reorder tasks within the same list
+- **Status toggle**: Click checkbox to mark complete/incomplete
+- **Delete**: Remove tasks with delete button
+
+Reordering uses batch update via `PUT /api/tasks/reorder` with `{ taskIds: string[] }`.
+
 ## File Naming Conventions
 
 - Pages: PascalCase in `src/pages/` (e.g., `ProjectDetail.tsx`)
