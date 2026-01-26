@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import { Plus, Check, Trash2, ListTodo } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Plus, Check, Trash2, ListTodo, LogIn } from 'lucide-react';
 import { useTasks, useCreateTask, useUpdateTask, useDeleteTask } from '../../hooks/useTasks';
+import { useCurrentUser } from '../../context/UserContext';
 import { Input, Button, Loading, EmptyState } from '../ui';
 import type { Task, TaskStatus } from '../../types';
 
@@ -9,6 +11,7 @@ interface TaskListProps {
 }
 
 export function TaskList({ projectId }: TaskListProps) {
+  const { currentUser } = useCurrentUser();
   const { data: tasks, isLoading } = useTasks(projectId);
   const createTask = useCreateTask(projectId);
   const updateTask = useUpdateTask(projectId);
@@ -17,18 +20,20 @@ export function TaskList({ projectId }: TaskListProps) {
 
   const handleAddTask = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTaskTitle.trim()) return;
+    if (!newTaskTitle.trim() || !currentUser) return;
     createTask.mutate({ title: newTaskTitle.trim() }, {
       onSuccess: () => setNewTaskTitle(''),
     });
   };
 
   const handleToggleStatus = (task: Task) => {
+    if (!currentUser) return;
     const newStatus: TaskStatus = task.status === 'done' ? 'todo' : 'done';
     updateTask.mutate({ id: task.id, data: { status: newStatus } });
   };
 
   const handleDelete = (id: string) => {
+    if (!currentUser) return;
     deleteTask.mutate(id);
   };
 
@@ -39,27 +44,53 @@ export function TaskList({ projectId }: TaskListProps) {
 
   return (
     <div>
-      {/* Add Task Form */}
-      <form onSubmit={handleAddTask} style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
-        <div style={{ flex: 1 }}>
-          <Input
-            type="text"
-            value={newTaskTitle}
-            onChange={(e) => setNewTaskTitle(e.target.value)}
-            placeholder="Add a new task..."
-          />
+      {/* Auth notice */}
+      {!currentUser && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            padding: '12px 16px',
+            marginBottom: '16px',
+            backgroundColor: 'var(--color-primary-50)',
+            borderRadius: 'var(--radius-md)',
+            border: '1px solid var(--color-primary-200)',
+          }}
+        >
+          <LogIn size={18} color="var(--color-primary-600)" />
+          <span style={{ flex: 1, fontSize: '0.875rem', color: 'var(--color-stone-600)' }}>
+            Sign in to add or manage tasks
+          </span>
+          <Link to="/login">
+            <Button size="sm" variant="primary">Sign In</Button>
+          </Link>
         </div>
-        <Button type="submit" icon={<Plus size={18} />} disabled={!newTaskTitle.trim()}>
-          Add
-        </Button>
-      </form>
+      )}
+
+      {/* Add Task Form */}
+      {currentUser && (
+        <form onSubmit={handleAddTask} style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
+          <div style={{ flex: 1 }}>
+            <Input
+              type="text"
+              value={newTaskTitle}
+              onChange={(e) => setNewTaskTitle(e.target.value)}
+              placeholder="Add a new task..."
+            />
+          </div>
+          <Button type="submit" icon={<Plus size={18} />} disabled={!newTaskTitle.trim()}>
+            Add
+          </Button>
+        </form>
+      )}
 
       {/* Empty State */}
       {todoTasks.length === 0 && doneTasks.length === 0 && (
         <EmptyState
           icon={<ListTodo size={24} />}
           title="No tasks yet"
-          description="Add tasks to track progress on this project"
+          description={currentUser ? "Add tasks to track progress on this project" : "Sign in to add tasks"}
         />
       )}
 
@@ -72,6 +103,7 @@ export function TaskList({ projectId }: TaskListProps) {
               task={task}
               onToggle={() => handleToggleStatus(task)}
               onDelete={() => handleDelete(task.id)}
+              disabled={!currentUser}
               style={{ animationDelay: `${index * 30}ms` }}
             />
           ))}
@@ -101,6 +133,7 @@ export function TaskList({ projectId }: TaskListProps) {
               task={task}
               onToggle={() => handleToggleStatus(task)}
               onDelete={() => handleDelete(task.id)}
+              disabled={!currentUser}
               style={{ animationDelay: `${index * 30}ms` }}
             />
           ))}
@@ -114,10 +147,11 @@ interface TaskItemProps {
   task: Task;
   onToggle: () => void;
   onDelete: () => void;
+  disabled?: boolean;
   style?: React.CSSProperties;
 }
 
-function TaskItem({ task, onToggle, onDelete, style }: TaskItemProps) {
+function TaskItem({ task, onToggle, onDelete, disabled, style }: TaskItemProps) {
   const isDone = task.status === 'done';
 
   return (
@@ -133,12 +167,14 @@ function TaskItem({ task, onToggle, onDelete, style }: TaskItemProps) {
         borderRadius: 'var(--radius-md)',
         border: '1px solid var(--color-stone-100)',
         transition: 'all var(--transition-fast)',
+        opacity: disabled ? 0.7 : 1,
         ...style,
       }}
     >
       {/* Checkbox */}
       <button
         onClick={onToggle}
+        disabled={disabled}
         style={{
           width: '22px',
           height: '22px',
@@ -147,7 +183,7 @@ function TaskItem({ task, onToggle, onDelete, style }: TaskItemProps) {
             ? 'none'
             : '2px solid var(--color-stone-300)',
           backgroundColor: isDone ? 'var(--color-success)' : 'transparent',
-          cursor: 'pointer',
+          cursor: disabled ? 'not-allowed' : 'pointer',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -171,31 +207,33 @@ function TaskItem({ task, onToggle, onDelete, style }: TaskItemProps) {
       </span>
 
       {/* Delete Button */}
-      <button
-        onClick={onDelete}
-        style={{
-          background: 'none',
-          border: 'none',
-          padding: '6px',
-          cursor: 'pointer',
-          color: 'var(--color-stone-300)',
-          borderRadius: 'var(--radius-sm)',
-          transition: 'all var(--transition-fast)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.color = 'var(--color-warning)';
-          e.currentTarget.style.backgroundColor = 'var(--color-warning-light)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.color = 'var(--color-stone-300)';
-          e.currentTarget.style.backgroundColor = 'transparent';
-        }}
-      >
-        <Trash2 size={16} />
-      </button>
+      {!disabled && (
+        <button
+          onClick={onDelete}
+          style={{
+            background: 'none',
+            border: 'none',
+            padding: '6px',
+            cursor: 'pointer',
+            color: 'var(--color-stone-300)',
+            borderRadius: 'var(--radius-sm)',
+            transition: 'all var(--transition-fast)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = 'var(--color-warning)';
+            e.currentTarget.style.backgroundColor = 'var(--color-warning-light)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = 'var(--color-stone-300)';
+            e.currentTarget.style.backgroundColor = 'transparent';
+          }}
+        >
+          <Trash2 size={16} />
+        </button>
+      )}
     </div>
   );
 }

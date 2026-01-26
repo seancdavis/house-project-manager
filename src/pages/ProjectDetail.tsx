@@ -5,7 +5,7 @@ import { useProject, useUpdateProject, useDeleteProject } from '../hooks/useProj
 import { useMembers } from '../hooks/useMembers';
 import { ProjectForm } from '../components/projects/ProjectForm';
 import { TaskList } from '../components/tasks/TaskList';
-import { Card, Button, StatusBadge, TypeBadge, Avatar, Modal, PageLoading } from '../components/ui';
+import { Card, Button, StatusBadge, TypeBadge, Avatar, Modal, PageLoading, RequireAuthButton } from '../components/ui';
 import type { ProjectInput } from '../types';
 
 export function ProjectDetailPage() {
@@ -78,12 +78,12 @@ export function ProjectDetailPage() {
           </div>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
-          <Button variant="secondary" onClick={() => setIsEditing(true)} icon={<Edit2 size={16} />}>
+          <RequireAuthButton variant="secondary" onClick={() => setIsEditing(true)} icon={<Edit2 size={16} />}>
             Edit
-          </Button>
-          <Button variant="ghost" onClick={() => setShowDeleteConfirm(true)} icon={<Trash2 size={16} />}>
+          </RequireAuthButton>
+          <RequireAuthButton variant="ghost" onClick={() => setShowDeleteConfirm(true)} icon={<Trash2 size={16} />}>
             Delete
-          </Button>
+          </RequireAuthButton>
         </div>
       </div>
 

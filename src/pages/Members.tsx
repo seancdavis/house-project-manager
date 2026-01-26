@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Plus, Users, Edit2, Trash2 } from 'lucide-react';
 import { useMembers, useCreateMember, useUpdateMember, useDeleteMember } from '../hooks/useMembers';
 import { MemberForm } from '../components/members/MemberForm';
-import { Card, Button, Avatar, TypeBadge, EmptyState, Modal, PageLoading } from '../components/ui';
+import { Card, Button, Avatar, TypeBadge, EmptyState, Modal, PageLoading, RequireAuthButton } from '../components/ui';
 import type { Member, MemberInput } from '../types';
 
 export function MembersPage() {
@@ -58,9 +58,9 @@ export function MembersPage() {
             Manage family members and contractors
           </p>
         </div>
-        <Button onClick={() => setShowForm(true)} icon={<Plus size={18} />}>
+        <RequireAuthButton onClick={() => setShowForm(true)} icon={<Plus size={18} />}>
           Add Member
-        </Button>
+        </RequireAuthButton>
       </div>
 
       {/* Create Modal */}
@@ -98,9 +98,9 @@ export function MembersPage() {
             title="No members yet"
             description="Add family members and contractors to assign them to projects"
             action={
-              <Button onClick={() => setShowForm(true)} icon={<Plus size={16} />}>
+              <RequireAuthButton onClick={() => setShowForm(true)} icon={<Plus size={16} />}>
                 Add Member
-              </Button>
+              </RequireAuthButton>
             }
           />
         </Card>

@@ -49,9 +49,16 @@ Use Lucide React for all icons. Import from `lucide-react`.
 
 **IMPORTANT**: Any action that adjusts a view (sorting, filtering) should result in a URL change so it can be shared and bookmarked. Use React Router's `useSearchParams` for query parameters.
 
-### User Context
+### User Context & Authentication
 
 The current user is stored in `UserContext` and persisted to localStorage. Access via `useCurrentUser()` hook.
+
+**IMPORTANT**: All mutation actions (create, edit, delete) require a signed-in user. Use:
+- `RequireAuthButton` component for action buttons that need auth
+- Check `currentUser` before executing mutations
+- Show sign-in prompts when auth is required but user is not signed in
+
+The login flow uses `/login` route where users select their profile from family members.
 
 ### Form Handling
 

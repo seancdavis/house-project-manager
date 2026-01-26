@@ -6,3 +6,4 @@ export { Avatar, AvatarGroup } from './Avatar';
 export { Modal } from './Modal';
 export { EmptyState } from './EmptyState';
 export { Loading, PageLoading } from './Loading';
+export { AuthGuard, RequireAuthButton } from './AuthGuard';

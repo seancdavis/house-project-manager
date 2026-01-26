@@ -3,7 +3,7 @@ import { Plus, FolderKanban, CheckCircle2 } from 'lucide-react';
 import { useProjects, useCreateProject } from '../hooks/useProjects';
 import { ProjectCard } from '../components/projects/ProjectCard';
 import { ProjectForm } from '../components/projects/ProjectForm';
-import { Card, Button, EmptyState, Modal, PageLoading } from '../components/ui';
+import { Card, EmptyState, Modal, PageLoading, RequireAuthButton } from '../components/ui';
 import type { ProjectInput } from '../types';
 
 export function ProjectsPage() {
@@ -40,9 +40,9 @@ export function ProjectsPage() {
             Manage and track all your home improvement projects
           </p>
         </div>
-        <Button onClick={() => setShowForm(true)} icon={<Plus size={18} />}>
+        <RequireAuthButton onClick={() => setShowForm(true)} icon={<Plus size={18} />}>
           New Project
-        </Button>
+        </RequireAuthButton>
       </div>
 
       {/* Modal for new project */}
@@ -58,9 +58,9 @@ export function ProjectsPage() {
             title="No projects yet"
             description="Create your first project to start tracking your home improvements"
             action={
-              <Button onClick={() => setShowForm(true)} icon={<Plus size={16} />}>
+              <RequireAuthButton onClick={() => setShowForm(true)} icon={<Plus size={16} />}>
                 Create Project
-              </Button>
+              </RequireAuthButton>
             }
           />
         </Card>
