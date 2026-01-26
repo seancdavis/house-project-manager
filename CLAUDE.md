@@ -121,6 +121,22 @@ Photo URLs are constructed as: `/.netlify/images?url=/.netlify/blobs/project-pho
 
 The `PhotoGallery` component in `src/components/photos/PhotoGallery.tsx` handles upload and display.
 
+### Notes
+
+Notes are a comments-like system for projects (and can be extended to tasks). Each note has:
+- `content`: The note text
+- `authorId`: Who wrote the note
+- `projectId` or `taskId`: What the note is attached to
+
+Use the `useNotes` hooks:
+- `useProjectNotes(projectId)`: Get notes for a project
+- `useTaskNotes(taskId)`: Get notes for a task
+- `useCreateNote()`: Create a new note
+- `useUpdateNote()`: Edit a note
+- `useDeleteNote()`: Delete a note
+
+Users can only edit/delete their own notes. The `NotesSection` component handles display and CRUD operations.
+
 ## File Naming Conventions
 
 - Pages: PascalCase in `src/pages/` (e.g., `ProjectDetail.tsx`)

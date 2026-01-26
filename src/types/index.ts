@@ -65,6 +65,17 @@ export interface Photo {
   url?: string; // Populated from Netlify Image CDN
 }
 
+export interface Note {
+  id: string;
+  projectId: string | null;
+  taskId: string | null;
+  content: string;
+  authorId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  author?: Member; // Populated from join
+}
+
 // Form input types (without generated fields)
 export interface MemberInput {
   name: string;

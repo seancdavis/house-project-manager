@@ -66,3 +66,14 @@ export const photos = pgTable('photos', {
   uploadedById: uuid('uploaded_by_id').references(() => members.id),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
+
+// Notes for projects and tasks
+export const notes = pgTable('notes', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  projectId: uuid('project_id').references(() => projects.id, { onDelete: 'cascade' }),
+  taskId: uuid('task_id').references(() => tasks.id, { onDelete: 'cascade' }),
+  content: text('content').notNull(),
+  authorId: uuid('author_id').references(() => members.id),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
