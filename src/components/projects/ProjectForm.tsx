@@ -1,5 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { useMembers } from '../../hooks/useMembers';
+import { Input, Textarea, Select, InputWrapper, Button } from '../ui';
 import type { Project, ProjectInput } from '../../types';
 
 interface ProjectFormProps {
@@ -27,108 +28,74 @@ export function ProjectForm({ project, onSubmit, onCancel }: ProjectFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <div style={{ marginBottom: '1rem' }}>
-        <label>
-          Title
-          <input
-            type="text"
-            {...register('title', { required: 'Title is required' })}
-            style={{ display: 'block', width: '100%', padding: '0.5rem', marginTop: '0.25rem' }}
-          />
-        </label>
-        {errors.title && <span style={{ color: 'red' }}>{errors.title.message}</span>}
-      </div>
+      <InputWrapper label="Title" error={errors.title?.message}>
+        <Input
+          type="text"
+          {...register('title', { required: 'Title is required' })}
+          placeholder="e.g., Kitchen Renovation"
+        />
+      </InputWrapper>
 
-      <div style={{ marginBottom: '1rem' }}>
-        <label>
-          Description
-          <textarea
-            {...register('description')}
-            rows={3}
-            style={{ display: 'block', width: '100%', padding: '0.5rem', marginTop: '0.25rem' }}
-          />
-        </label>
-      </div>
+      <InputWrapper label="Description">
+        <Textarea
+          {...register('description')}
+          placeholder="Describe the project scope and goals..."
+          rows={3}
+        />
+      </InputWrapper>
 
-      <div style={{ marginBottom: '1rem' }}>
-        <label>
-          Type
-          <select
-            {...register('type')}
-            style={{ display: 'block', width: '100%', padding: '0.5rem', marginTop: '0.25rem' }}
-          >
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        <InputWrapper label="Type">
+          <Select {...register('type')}>
             <option value="diy">DIY</option>
             <option value="contractor">Contractor</option>
             <option value="handyman">Handyman Session</option>
-          </select>
-        </label>
-      </div>
+          </Select>
+        </InputWrapper>
 
-      {project && (
-        <div style={{ marginBottom: '1rem' }}>
-          <label>
-            Status
-            <select
-              {...register('status')}
-              style={{ display: 'block', width: '100%', padding: '0.5rem', marginTop: '0.25rem' }}
-            >
+        {project && (
+          <InputWrapper label="Status">
+            <Select {...register('status')}>
               <option value="not_started">Not Started</option>
               <option value="in_progress">In Progress</option>
               <option value="on_hold">On Hold</option>
               <option value="completed">Completed</option>
-            </select>
-          </label>
-        </div>
-      )}
+            </Select>
+          </InputWrapper>
+        )}
+      </div>
 
-      <div style={{ marginBottom: '1rem' }}>
-        <label>
-          Owner
-          <select
-            {...register('ownerId')}
-            style={{ display: 'block', width: '100%', padding: '0.5rem', marginTop: '0.25rem' }}
-          >
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        <InputWrapper label="Owner">
+          <Select {...register('ownerId')}>
             <option value="">Select owner...</option>
             {members?.filter(m => m.type === 'family').map(member => (
               <option key={member.id} value={member.id}>{member.name}</option>
             ))}
-          </select>
-        </label>
-      </div>
+          </Select>
+        </InputWrapper>
 
-      <div style={{ marginBottom: '1rem' }}>
-        <label>
-          Implementer
-          <select
-            {...register('implementerId')}
-            style={{ display: 'block', width: '100%', padding: '0.5rem', marginTop: '0.25rem' }}
-          >
+        <InputWrapper label="Implementer">
+          <Select {...register('implementerId')}>
             <option value="">Select implementer...</option>
             {members?.map(member => (
               <option key={member.id} value={member.id}>{member.name}</option>
             ))}
-          </select>
-        </label>
+          </Select>
+        </InputWrapper>
       </div>
 
-      <div style={{ marginBottom: '1rem' }}>
-        <label>
-          Target Date
-          <input
-            type="date"
-            {...register('targetDate')}
-            style={{ display: 'block', width: '100%', padding: '0.5rem', marginTop: '0.25rem' }}
-          />
-        </label>
-      </div>
+      <InputWrapper label="Target Date">
+        <Input type="date" {...register('targetDate')} />
+      </InputWrapper>
 
-      <div style={{ display: 'flex', gap: '0.5rem' }}>
-        <button type="submit" style={{ padding: '0.5rem 1rem' }}>
-          {project ? 'Update' : 'Create'}
-        </button>
-        <button type="button" onClick={onCancel} style={{ padding: '0.5rem 1rem' }}>
+      <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '24px' }}>
+        <Button type="button" variant="secondary" onClick={onCancel}>
           Cancel
-        </button>
+        </Button>
+        <Button type="submit">
+          {project ? 'Update Project' : 'Create Project'}
+        </Button>
       </div>
     </form>
   );

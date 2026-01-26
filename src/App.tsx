@@ -6,6 +6,7 @@ import { DashboardPage } from './pages/Dashboard';
 import { ProjectsPage } from './pages/Projects';
 import { ProjectDetailPage } from './pages/ProjectDetail';
 import { MembersPage } from './pages/Members';
+import { LoginPage } from './pages/Login';
 
 const queryClient = new QueryClient();
 
@@ -15,6 +16,7 @@ function App() {
       <UserProvider>
         <BrowserRouter>
           <Routes>
+            <Route path="/login" element={<LoginPage />} />
             <Route path="/" element={<AppLayout />}>
               <Route index element={<DashboardPage />} />
               <Route path="projects" element={<ProjectsPage />} />

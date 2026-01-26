@@ -1,23 +1,12 @@
 import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { ArrowLeft, Edit2, Trash2, Calendar, User, Wrench } from 'lucide-react';
 import { useProject, useUpdateProject, useDeleteProject } from '../hooks/useProjects';
 import { useMembers } from '../hooks/useMembers';
 import { ProjectForm } from '../components/projects/ProjectForm';
 import { TaskList } from '../components/tasks/TaskList';
+import { Card, Button, StatusBadge, TypeBadge, Avatar, Modal, PageLoading } from '../components/ui';
 import type { ProjectInput } from '../types';
-
-const STATUS_LABELS = {
-  not_started: 'Not Started',
-  in_progress: 'In Progress',
-  on_hold: 'On Hold',
-  completed: 'Completed',
-};
-
-const TYPE_LABELS = {
-  diy: 'DIY',
-  contractor: 'Contractor',
-  handyman: 'Handyman Session',
-};
 
 export function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -27,8 +16,9 @@ export function ProjectDetailPage() {
   const updateProject = useUpdateProject();
   const deleteProject = useDeleteProject();
   const [isEditing, setIsEditing] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <PageLoading />;
   if (error) return <div>Error: {error.message}</div>;
   if (!project) return <div>Project not found</div>;
 
@@ -42,66 +32,219 @@ export function ProjectDetailPage() {
   };
 
   const handleDelete = () => {
-    if (confirm('Delete this project and all its tasks?')) {
-      deleteProject.mutate(project.id, {
-        onSuccess: () => navigate('/projects'),
-      });
-    }
+    deleteProject.mutate(project.id, {
+      onSuccess: () => navigate('/projects'),
+    });
   };
 
-  if (isEditing) {
-    return (
-      <div>
-        <h1>Edit Project</h1>
-        <ProjectForm project={project} onSubmit={handleUpdate} onCancel={() => setIsEditing(false)} />
-      </div>
-    );
-  }
-
   return (
-    <div>
-      <div style={{ marginBottom: '1rem' }}>
-        <Link to="/projects">&larr; Back to Projects</Link>
-      </div>
+    <div className="animate-fade-in">
+      {/* Back link */}
+      <Link
+        to="/projects"
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '8px',
+          color: 'var(--color-stone-500)',
+          textDecoration: 'none',
+          fontSize: '0.9375rem',
+          marginBottom: '24px',
+          transition: 'color var(--transition-fast)',
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.color = 'var(--color-stone-700)'}
+        onMouseLeave={(e) => e.currentTarget.style.color = 'var(--color-stone-500)'}
+      >
+        <ArrowLeft size={18} />
+        Back to Projects
+      </Link>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      {/* Header */}
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          marginBottom: '24px',
+        }}
+      >
         <div>
-          <h1 style={{ marginBottom: '0.5rem' }}>{project.title}</h1>
-          <div style={{ color: '#666' }}>
-            {TYPE_LABELS[project.type]} · {STATUS_LABELS[project.status]}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+            <h1 style={{ fontSize: '1.75rem', margin: 0 }}>{project.title}</h1>
+            <StatusBadge status={project.status} />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <TypeBadge type={project.type} />
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <button onClick={() => setIsEditing(true)} style={{ padding: '0.5rem 1rem' }}>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <Button variant="secondary" onClick={() => setIsEditing(true)} icon={<Edit2 size={16} />}>
             Edit
-          </button>
-          <button onClick={handleDelete} style={{ padding: '0.5rem 1rem' }}>
+          </Button>
+          <Button variant="ghost" onClick={() => setShowDeleteConfirm(true)} icon={<Trash2 size={16} />}>
             Delete
-          </button>
+          </Button>
         </div>
       </div>
 
-      {project.description && (
-        <p style={{ marginTop: '1rem' }}>{project.description}</p>
-      )}
+      {/* Edit Modal */}
+      <Modal isOpen={isEditing} onClose={() => setIsEditing(false)} title="Edit Project" size="md">
+        <ProjectForm project={project} onSubmit={handleUpdate} onCancel={() => setIsEditing(false)} />
+      </Modal>
 
-      <div style={{ marginTop: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
-        <div>
-          <strong>Owner:</strong> {owner?.name || 'Unassigned'}
+      {/* Delete Confirmation Modal */}
+      <Modal isOpen={showDeleteConfirm} onClose={() => setShowDeleteConfirm(false)} title="Delete Project" size="sm">
+        <p style={{ marginBottom: '24px', color: 'var(--color-stone-600)' }}>
+          Are you sure you want to delete this project? This will also delete all tasks associated with it. This action cannot be undone.
+        </p>
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+          <Button variant="secondary" onClick={() => setShowDeleteConfirm(false)}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={handleDelete}>
+            Delete Project
+          </Button>
         </div>
-        <div>
-          <strong>Implementer:</strong> {implementer?.name || 'Unassigned'}
-        </div>
-        {project.targetDate && (
-          <div>
-            <strong>Target Date:</strong> {new Date(project.targetDate).toLocaleDateString()}
-          </div>
-        )}
-      </div>
+      </Modal>
 
-      <div style={{ marginTop: '2rem' }}>
-        <h2>Tasks</h2>
-        <TaskList projectId={project.id} />
+      {/* Content Grid */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 320px',
+          gap: '24px',
+        }}
+      >
+        {/* Main Content */}
+        <div>
+          {/* Description */}
+          {project.description && (
+            <Card style={{ marginBottom: '24px' }}>
+              <h3 style={{ fontSize: '1rem', marginBottom: '12px', color: 'var(--color-stone-700)' }}>
+                Description
+              </h3>
+              <p style={{ color: 'var(--color-stone-600)', whiteSpace: 'pre-wrap', lineHeight: 1.7 }}>
+                {project.description}
+              </p>
+            </Card>
+          )}
+
+          {/* Tasks */}
+          <Card>
+            <h3 style={{ fontSize: '1rem', marginBottom: '16px', color: 'var(--color-stone-700)' }}>
+              Tasks
+            </h3>
+            <TaskList projectId={project.id} />
+          </Card>
+        </div>
+
+        {/* Sidebar */}
+        <div>
+          <Card>
+            <h3 style={{ fontSize: '1rem', marginBottom: '20px', color: 'var(--color-stone-700)' }}>
+              Details
+            </h3>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {/* Owner */}
+              <div>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontSize: '0.8125rem',
+                    color: 'var(--color-stone-500)',
+                    marginBottom: '8px',
+                  }}
+                >
+                  <User size={14} />
+                  Owner
+                </div>
+                {owner ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <Avatar initials={owner.initials} color={owner.color} size="sm" />
+                    <span style={{ fontWeight: 500 }}>{owner.name}</span>
+                  </div>
+                ) : (
+                  <span style={{ color: 'var(--color-stone-400)' }}>Unassigned</span>
+                )}
+              </div>
+
+              {/* Implementer */}
+              <div>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontSize: '0.8125rem',
+                    color: 'var(--color-stone-500)',
+                    marginBottom: '8px',
+                  }}
+                >
+                  <Wrench size={14} />
+                  Implementer
+                </div>
+                {implementer ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <Avatar initials={implementer.initials} color={implementer.color} size="sm" />
+                    <span style={{ fontWeight: 500 }}>{implementer.name}</span>
+                  </div>
+                ) : (
+                  <span style={{ color: 'var(--color-stone-400)' }}>Unassigned</span>
+                )}
+              </div>
+
+              {/* Target Date */}
+              <div>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontSize: '0.8125rem',
+                    color: 'var(--color-stone-500)',
+                    marginBottom: '8px',
+                  }}
+                >
+                  <Calendar size={14} />
+                  Target Date
+                </div>
+                {project.targetDate ? (
+                  <span style={{ fontWeight: 500 }}>
+                    {new Date(project.targetDate).toLocaleDateString('en-US', {
+                      month: 'long',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}
+                  </span>
+                ) : (
+                  <span style={{ color: 'var(--color-stone-400)' }}>Not set</span>
+                )}
+              </div>
+
+              {/* Timestamps */}
+              <div
+                style={{
+                  paddingTop: '16px',
+                  borderTop: '1px solid var(--color-stone-100)',
+                  fontSize: '0.8125rem',
+                  color: 'var(--color-stone-400)',
+                }}
+              >
+                <div style={{ marginBottom: '4px' }}>
+                  Created {new Date(project.createdAt).toLocaleDateString()}
+                </div>
+                {project.completedAt && (
+                  <div>
+                    Completed {new Date(project.completedAt).toLocaleDateString()}
+                  </div>
+                )}
+              </div>
+            </div>
+          </Card>
+        </div>
       </div>
     </div>
   );

@@ -1,79 +1,304 @@
 import { Link } from 'react-router-dom';
+import { FolderKanban, Clock, CheckCircle2, AlertCircle, Plus, Users, ArrowRight } from 'lucide-react';
 import { useProjects } from '../hooks/useProjects';
 import { useMembers } from '../hooks/useMembers';
 import { ProjectCard } from '../components/projects/ProjectCard';
 import { useCurrentUser } from '../context/UserContext';
+import { Card, Button, EmptyState, PageLoading } from '../components/ui';
 
 export function DashboardPage() {
   const { data: projects, isLoading: projectsLoading } = useProjects();
   const { data: members, isLoading: membersLoading } = useMembers();
   const { currentUser } = useCurrentUser();
 
-  if (projectsLoading || membersLoading) return <div>Loading...</div>;
+  if (projectsLoading || membersLoading) return <PageLoading />;
 
   const activeProjects = projects?.filter(p => p.status !== 'completed') || [];
   const completedProjects = projects?.filter(p => p.status === 'completed') || [];
+  const inProgressProjects = activeProjects.filter(p => p.status === 'in_progress');
+  const onHoldProjects = activeProjects.filter(p => p.status === 'on_hold');
 
   const myProjects = currentUser
     ? activeProjects.filter(p => p.ownerId === currentUser.id)
     : [];
 
-  const inProgressProjects = activeProjects.filter(p => p.status === 'in_progress');
+  const familyMembers = members?.filter(m => m.type === 'family') || [];
+
+  const stats = [
+    {
+      label: 'Active Projects',
+      value: activeProjects.length,
+      icon: FolderKanban,
+      color: 'var(--color-primary-500)',
+      bgColor: 'var(--color-primary-50)',
+    },
+    {
+      label: 'In Progress',
+      value: inProgressProjects.length,
+      icon: Clock,
+      color: 'var(--color-info)',
+      bgColor: 'var(--color-info-light)',
+    },
+    {
+      label: 'On Hold',
+      value: onHoldProjects.length,
+      icon: AlertCircle,
+      color: 'var(--color-warning)',
+      bgColor: 'var(--color-warning-light)',
+    },
+    {
+      label: 'Completed',
+      value: completedProjects.length,
+      icon: CheckCircle2,
+      color: 'var(--color-success)',
+      bgColor: 'var(--color-success-light)',
+    },
+  ];
 
   return (
-    <div>
-      <h1>Dashboard</h1>
+    <div className="animate-fade-in">
+      {/* Header */}
+      <div style={{ marginBottom: '32px' }}>
+        <h1 style={{ fontSize: '2rem', marginBottom: '8px' }}>
+          {currentUser ? `Welcome back, ${currentUser.name.split(' ')[0]}` : 'Dashboard'}
+        </h1>
+        <p style={{ color: 'var(--color-stone-500)', fontSize: '1.0625rem' }}>
+          Track and manage your home improvement projects
+        </p>
+      </div>
 
-      {!currentUser && members && members.filter(m => m.type === 'family').length > 0 && (
-        <div style={{ padding: '1rem', backgroundColor: '#fef3c7', marginBottom: '1rem', borderRadius: '4px' }}>
-          Select yourself from the dropdown above to see your projects.
-        </div>
+      {/* Alerts */}
+      {!currentUser && familyMembers.length > 0 && (
+        <Card
+          style={{
+            marginBottom: '24px',
+            backgroundColor: 'var(--color-primary-50)',
+            border: '1px solid var(--color-primary-200)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div
+              style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                backgroundColor: 'var(--color-primary-100)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Users size={20} color="var(--color-primary-600)" />
+            </div>
+            <div style={{ flex: 1 }}>
+              <p style={{ fontWeight: 500, color: 'var(--color-stone-800)', marginBottom: '2px' }}>
+                Sign in to see your projects
+              </p>
+              <p style={{ fontSize: '0.875rem', color: 'var(--color-stone-600)' }}>
+                Select yourself from the sidebar to view personalized content
+              </p>
+            </div>
+            <Link to="/login">
+              <Button size="sm">Sign In</Button>
+            </Link>
+          </div>
+        </Card>
       )}
 
-      {members?.filter(m => m.type === 'family').length === 0 && (
-        <div style={{ padding: '1rem', backgroundColor: '#fef3c7', marginBottom: '1rem', borderRadius: '4px' }}>
-          <Link to="/members">Add family members</Link> to get started.
-        </div>
+      {familyMembers.length === 0 && (
+        <Card
+          style={{
+            marginBottom: '24px',
+            backgroundColor: 'var(--color-primary-50)',
+            border: '1px solid var(--color-primary-200)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div
+              style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                backgroundColor: 'var(--color-primary-100)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Users size={20} color="var(--color-primary-600)" />
+            </div>
+            <div style={{ flex: 1 }}>
+              <p style={{ fontWeight: 500, color: 'var(--color-stone-800)', marginBottom: '2px' }}>
+                Get started by adding family members
+              </p>
+              <p style={{ fontSize: '0.875rem', color: 'var(--color-stone-600)' }}>
+                Add people who will be working on projects around the house
+              </p>
+            </div>
+            <Link to="/members">
+              <Button size="sm" icon={<Plus size={16} />}>Add Members</Button>
+            </Link>
+          </div>
+        </Card>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
-        <div style={{ padding: '1rem', border: '1px solid #ddd', borderRadius: '4px' }}>
-          <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{activeProjects.length}</div>
-          <div style={{ color: '#666' }}>Active Projects</div>
-        </div>
-        <div style={{ padding: '1rem', border: '1px solid #ddd', borderRadius: '4px' }}>
-          <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{inProgressProjects.length}</div>
-          <div style={{ color: '#666' }}>In Progress</div>
-        </div>
-        <div style={{ padding: '1rem', border: '1px solid #ddd', borderRadius: '4px' }}>
-          <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{completedProjects.length}</div>
-          <div style={{ color: '#666' }}>Completed</div>
+      {/* Stats */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: '20px',
+          marginBottom: '40px',
+        }}
+      >
+        {stats.map((stat) => {
+          const Icon = stat.icon;
+          return (
+            <Card key={stat.label} padding="md">
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                <div>
+                  <p style={{
+                    fontSize: '0.875rem',
+                    color: 'var(--color-stone-500)',
+                    marginBottom: '8px',
+                  }}>
+                    {stat.label}
+                  </p>
+                  <p style={{
+                    fontSize: '2rem',
+                    fontWeight: 600,
+                    color: 'var(--color-stone-900)',
+                    fontFamily: 'var(--font-body)',
+                    lineHeight: 1,
+                  }}>
+                    {stat.value}
+                  </p>
+                </div>
+                <div
+                  style={{
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: 'var(--radius-md)',
+                    backgroundColor: stat.bgColor,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Icon size={22} color={stat.color} />
+                </div>
+              </div>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Content Grid */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: currentUser && myProjects.length > 0 ? '1fr 1fr' : '1fr',
+          gap: '24px',
+        }}
+      >
+        {/* My Projects */}
+        {currentUser && myProjects.length > 0 && (
+          <div>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '16px',
+            }}>
+              <h2 style={{ fontSize: '1.25rem' }}>My Projects</h2>
+              <Link
+                to="/projects"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  color: 'var(--color-primary-600)',
+                  textDecoration: 'none',
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                }}
+              >
+                View all <ArrowRight size={16} />
+              </Link>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {myProjects.slice(0, 4).map((project, index) => (
+                <div key={project.id} style={{ animationDelay: `${index * 50}ms` }} className="animate-slide-in-up">
+                  <ProjectCard project={project} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* In Progress */}
+        <div>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '16px',
+          }}>
+            <h2 style={{ fontSize: '1.25rem' }}>In Progress</h2>
+            <Link
+              to="/projects"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                color: 'var(--color-primary-600)',
+                textDecoration: 'none',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+              }}
+            >
+              View all <ArrowRight size={16} />
+            </Link>
+          </div>
+          {inProgressProjects.length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {inProgressProjects.slice(0, 4).map((project, index) => (
+                <div key={project.id} style={{ animationDelay: `${index * 50}ms` }} className="animate-slide-in-up">
+                  <ProjectCard project={project} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <Card>
+              <EmptyState
+                icon={<Clock size={28} />}
+                title="No projects in progress"
+                description="Start working on a project to see it here"
+                action={
+                  <Link to="/projects">
+                    <Button size="sm" icon={<Plus size={16} />}>New Project</Button>
+                  </Link>
+                }
+              />
+            </Card>
+          )}
         </div>
       </div>
 
-      {currentUser && myProjects.length > 0 && (
-        <div style={{ marginBottom: '2rem' }}>
-          <h2>My Projects ({myProjects.length})</h2>
-          {myProjects.map(project => (
-            <ProjectCard key={project.id} project={project} />
-          ))}
-        </div>
-      )}
-
-      {inProgressProjects.length > 0 && (
-        <div style={{ marginBottom: '2rem' }}>
-          <h2>In Progress ({inProgressProjects.length})</h2>
-          {inProgressProjects.map(project => (
-            <ProjectCard key={project.id} project={project} />
-          ))}
-        </div>
-      )}
-
-      {activeProjects.length === 0 && (
-        <div style={{ marginTop: '1rem' }}>
-          <p>No active projects.</p>
-          <Link to="/projects">Create your first project</Link>
-        </div>
+      {/* Empty state when no projects */}
+      {activeProjects.length === 0 && completedProjects.length === 0 && familyMembers.length > 0 && (
+        <Card style={{ marginTop: '24px' }}>
+          <EmptyState
+            icon={<FolderKanban size={28} />}
+            title="No projects yet"
+            description="Create your first project to start tracking your home improvements"
+            action={
+              <Link to="/projects">
+                <Button icon={<Plus size={16} />}>Create Project</Button>
+              </Link>
+            }
+          />
+        </Card>
       )}
     </div>
   );

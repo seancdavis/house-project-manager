@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { Plus, Users, Edit2, Trash2 } from 'lucide-react';
 import { useMembers, useCreateMember, useUpdateMember, useDeleteMember } from '../hooks/useMembers';
 import { MemberForm } from '../components/members/MemberForm';
+import { Card, Button, Avatar, TypeBadge, EmptyState, Modal, PageLoading } from '../components/ui';
 import type { Member, MemberInput } from '../types';
 
 export function MembersPage() {
@@ -11,6 +13,7 @@ export function MembersPage() {
 
   const [showForm, setShowForm] = useState(false);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
+  const [deletingMember, setDeletingMember] = useState<Member | null>(null);
 
   const handleCreate = (data: MemberInput) => {
     createMember.mutate(data, {
@@ -25,81 +28,194 @@ export function MembersPage() {
     });
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm('Delete this member?')) {
-      deleteMember.mutate(id);
-    }
+  const handleDelete = () => {
+    if (!deletingMember) return;
+    deleteMember.mutate(deletingMember.id, {
+      onSuccess: () => setDeletingMember(null),
+    });
   };
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <PageLoading />;
   if (error) return <div>Error: {error.message}</div>;
 
+  const familyMembers = members?.filter(m => m.type === 'family') || [];
+  const contractors = members?.filter(m => m.type === 'contractor') || [];
+
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <h1>Members</h1>
-        <button onClick={() => setShowForm(true)} style={{ padding: '0.5rem 1rem' }}>
+    <div className="animate-fade-in">
+      {/* Header */}
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          marginBottom: '32px',
+        }}
+      >
+        <div>
+          <h1 style={{ fontSize: '2rem', marginBottom: '8px' }}>Members</h1>
+          <p style={{ color: 'var(--color-stone-500)', fontSize: '1.0625rem' }}>
+            Manage family members and contractors
+          </p>
+        </div>
+        <Button onClick={() => setShowForm(true)} icon={<Plus size={18} />}>
           Add Member
-        </button>
+        </Button>
       </div>
 
-      {showForm && (
-        <div style={{ marginBottom: '1rem', padding: '1rem', border: '1px solid #ccc' }}>
-          <h2>New Member</h2>
-          <MemberForm onSubmit={handleCreate} onCancel={() => setShowForm(false)} />
-        </div>
-      )}
+      {/* Create Modal */}
+      <Modal isOpen={showForm} onClose={() => setShowForm(false)} title="New Member" size="md">
+        <MemberForm onSubmit={handleCreate} onCancel={() => setShowForm(false)} />
+      </Modal>
 
-      {editingMember && (
-        <div style={{ marginBottom: '1rem', padding: '1rem', border: '1px solid #ccc' }}>
-          <h2>Edit Member</h2>
+      {/* Edit Modal */}
+      <Modal isOpen={!!editingMember} onClose={() => setEditingMember(null)} title="Edit Member" size="md">
+        {editingMember && (
           <MemberForm member={editingMember} onSubmit={handleUpdate} onCancel={() => setEditingMember(null)} />
+        )}
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal isOpen={!!deletingMember} onClose={() => setDeletingMember(null)} title="Delete Member" size="sm">
+        <p style={{ marginBottom: '24px', color: 'var(--color-stone-600)' }}>
+          Are you sure you want to delete <strong>{deletingMember?.name}</strong>? This action cannot be undone.
+        </p>
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+          <Button variant="secondary" onClick={() => setDeletingMember(null)}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={handleDelete}>
+            Delete Member
+          </Button>
         </div>
+      </Modal>
+
+      {/* Empty State */}
+      {members?.length === 0 && (
+        <Card>
+          <EmptyState
+            icon={<Users size={28} />}
+            title="No members yet"
+            description="Add family members and contractors to assign them to projects"
+            action={
+              <Button onClick={() => setShowForm(true)} icon={<Plus size={16} />}>
+                Add Member
+              </Button>
+            }
+          />
+        </Card>
       )}
 
-      <div>
-        {members?.length === 0 && <p>No members yet. Add one to get started.</p>}
-        {members?.map(member => (
-          <div
-            key={member.id}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1rem',
-              padding: '0.75rem',
-              borderBottom: '1px solid #eee',
-            }}
-          >
-            <div
+      {/* Family Members */}
+      {familyMembers.length > 0 && (
+        <div style={{ marginBottom: '40px' }}>
+          <h2 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>
+            Family Members
+            <span
               style={{
-                width: '2.5rem',
-                height: '2.5rem',
-                borderRadius: '50%',
-                backgroundColor: member.color,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                fontWeight: 'bold',
+                marginLeft: '10px',
+                fontSize: '0.875rem',
+                fontFamily: 'var(--font-body)',
+                color: 'var(--color-stone-400)',
+                fontWeight: 400,
               }}
             >
-              {member.initials}
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 'bold' }}>{member.name}</div>
-              <div style={{ fontSize: '0.875rem', color: '#666' }}>
-                {member.type === 'family' ? 'Family' : 'Contractor'}
+              {familyMembers.length}
+            </span>
+          </h2>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+              gap: '16px',
+            }}
+          >
+            {familyMembers.map((member, index) => (
+              <div key={member.id} style={{ animationDelay: `${index * 50}ms` }} className="animate-slide-in-up">
+                <MemberCard
+                  member={member}
+                  onEdit={() => setEditingMember(member)}
+                  onDelete={() => setDeletingMember(member)}
+                />
               </div>
-            </div>
-            <button onClick={() => setEditingMember(member)} style={{ padding: '0.25rem 0.5rem' }}>
-              Edit
-            </button>
-            <button onClick={() => handleDelete(member.id)} style={{ padding: '0.25rem 0.5rem' }}>
-              Delete
-            </button>
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      )}
+
+      {/* Contractors */}
+      {contractors.length > 0 && (
+        <div>
+          <h2 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>
+            Contractors
+            <span
+              style={{
+                marginLeft: '10px',
+                fontSize: '0.875rem',
+                fontFamily: 'var(--font-body)',
+                color: 'var(--color-stone-400)',
+                fontWeight: 400,
+              }}
+            >
+              {contractors.length}
+            </span>
+          </h2>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+              gap: '16px',
+            }}
+          >
+            {contractors.map((member, index) => (
+              <div key={member.id} style={{ animationDelay: `${index * 50}ms` }} className="animate-slide-in-up">
+                <MemberCard
+                  member={member}
+                  onEdit={() => setEditingMember(member)}
+                  onDelete={() => setDeletingMember(member)}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+interface MemberCardProps {
+  member: Member;
+  onEdit: () => void;
+  onDelete: () => void;
+}
+
+function MemberCard({ member, onEdit, onDelete }: MemberCardProps) {
+  return (
+    <Card hover>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <Avatar initials={member.initials} color={member.color} size="lg" />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <h3
+            style={{
+              fontSize: '1.0625rem',
+              fontFamily: 'var(--font-display)',
+              margin: 0,
+              marginBottom: '4px',
+            }}
+          >
+            {member.name}
+          </h3>
+          <TypeBadge type={member.type} />
+        </div>
+        <div style={{ display: 'flex', gap: '4px' }}>
+          <Button variant="ghost" size="sm" onClick={onEdit} style={{ padding: '8px' }}>
+            <Edit2 size={16} />
+          </Button>
+          <Button variant="ghost" size="sm" onClick={onDelete} style={{ padding: '8px' }}>
+            <Trash2 size={16} />
+          </Button>
+        </div>
+      </div>
+    </Card>
   );
 }
