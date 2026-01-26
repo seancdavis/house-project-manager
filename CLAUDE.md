@@ -58,9 +58,21 @@ const [filters, setFilters, resetFilters] = useProjectFilters();
 ```
 
 Available hooks:
-- `useProjectFilters()` - For project list filtering/sorting
+- `useProjectFilters()` - For project list filtering/sorting/view
 - `useMemberFilters()` - For member list filtering/sorting
 - `useUrlState(defaults)` - Generic hook for custom URL state
+
+### Project Views
+
+The Projects page supports three views, controlled via URL parameter `?view=`:
+- `cards` (default): Card layout with Active/Completed sections
+- `table`: Tabular view with sortable columns
+- `kanban`: Board view grouped by status (Not Started, In Progress, On Hold, Completed)
+
+Components:
+- `ProjectCard`: Used in cards view
+- `ProjectsTable`: Table component for list view
+- `ProjectsKanban`: Board component for kanban view
 
 ### User Context & Authentication
 

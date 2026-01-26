@@ -1,10 +1,12 @@
 import { useState, useMemo } from 'react';
-import { Plus, FolderKanban, CheckCircle2, Filter, ArrowUpDown, X } from 'lucide-react';
+import { Plus, FolderKanban, CheckCircle2, Filter, ArrowUpDown, X, LayoutGrid, Table, Columns3 } from 'lucide-react';
 import { useProjects, useCreateProject } from '../hooks/useProjects';
 import { useMembers } from '../hooks/useMembers';
 import { useProjectFilters } from '../hooks/useUrlState';
 import { ProjectCard } from '../components/projects/ProjectCard';
 import { ProjectForm } from '../components/projects/ProjectForm';
+import { ProjectsTable } from '../components/projects/ProjectsTable';
+import { ProjectsKanban } from '../components/projects/ProjectsKanban';
 import { Card, EmptyState, Modal, PageLoading, RequireAuthButton, Button, Select } from '../components/ui';
 import type { ProjectInput, Project } from '../types';
 
@@ -163,13 +165,77 @@ export function ProjectsPage() {
             </Button>
           </div>
 
+          {/* View Toggle */}
+          <div
+            style={{
+              display: 'flex',
+              marginLeft: 'auto',
+              border: '1px solid var(--color-stone-200)',
+              borderRadius: 'var(--radius-md)',
+              overflow: 'hidden',
+            }}
+          >
+            <button
+              onClick={() => setFilters({ view: 'cards' })}
+              style={{
+                padding: '6px 10px',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: (!filters.view || filters.view === 'cards') ? 'var(--color-primary-100)' : 'transparent',
+                color: (!filters.view || filters.view === 'cards') ? 'var(--color-primary-700)' : 'var(--color-stone-500)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                fontSize: '0.8125rem',
+              }}
+              title="Card View"
+            >
+              <LayoutGrid size={16} />
+            </button>
+            <button
+              onClick={() => setFilters({ view: 'table' })}
+              style={{
+                padding: '6px 10px',
+                border: 'none',
+                borderLeft: '1px solid var(--color-stone-200)',
+                cursor: 'pointer',
+                backgroundColor: filters.view === 'table' ? 'var(--color-primary-100)' : 'transparent',
+                color: filters.view === 'table' ? 'var(--color-primary-700)' : 'var(--color-stone-500)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                fontSize: '0.8125rem',
+              }}
+              title="Table View"
+            >
+              <Table size={16} />
+            </button>
+            <button
+              onClick={() => setFilters({ view: 'kanban' })}
+              style={{
+                padding: '6px 10px',
+                border: 'none',
+                borderLeft: '1px solid var(--color-stone-200)',
+                cursor: 'pointer',
+                backgroundColor: filters.view === 'kanban' ? 'var(--color-primary-100)' : 'transparent',
+                color: filters.view === 'kanban' ? 'var(--color-primary-700)' : 'var(--color-stone-500)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                fontSize: '0.8125rem',
+              }}
+              title="Kanban View"
+            >
+              <Columns3 size={16} />
+            </button>
+          </div>
+
           {activeFiltersCount > 0 && (
             <Button
               variant="ghost"
               size="sm"
               onClick={resetFilters}
               icon={<X size={14} />}
-              style={{ marginLeft: 'auto' }}
             >
               Clear filters
             </Button>
@@ -266,60 +332,77 @@ export function ProjectsPage() {
         </Card>
       )}
 
-      {/* Active Projects */}
-      {activeProjects.length > 0 && (
-        <div style={{ marginBottom: '40px' }}>
-          <h2 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>
-            Active Projects
-            <span
-              style={{
-                marginLeft: '10px',
-                fontSize: '0.875rem',
-                fontFamily: 'var(--font-body)',
-                color: 'var(--color-stone-400)',
-                fontWeight: 400,
-              }}
-            >
-              {activeProjects.length}
-            </span>
-          </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {activeProjects.map((project, index) => (
-              <div key={project.id} style={{ animationDelay: `${index * 50}ms` }} className="animate-slide-in-up">
-                <ProjectCard project={project} />
-              </div>
-            ))}
-          </div>
-        </div>
+      {/* Table View */}
+      {filteredProjects.length > 0 && filters.view === 'table' && (
+        <Card>
+          <ProjectsTable projects={filteredProjects} />
+        </Card>
       )}
 
-      {/* Completed Projects */}
-      {completedProjects.length > 0 && (
-        <div>
-          <h2 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <CheckCircle2 size={20} color="var(--color-success)" />
-              Completed
-              <span
-                style={{
-                  fontSize: '0.875rem',
-                  fontFamily: 'var(--font-body)',
-                  color: 'var(--color-stone-400)',
-                  fontWeight: 400,
-                }}
-              >
-                {completedProjects.length}
-              </span>
-            </span>
-          </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {completedProjects.map((project, index) => (
-              <div key={project.id} style={{ animationDelay: `${index * 50}ms` }} className="animate-slide-in-up">
-                <ProjectCard project={project} />
+      {/* Kanban View */}
+      {filteredProjects.length > 0 && filters.view === 'kanban' && (
+        <ProjectsKanban projects={filteredProjects} />
+      )}
+
+      {/* Cards View (default) */}
+      {filteredProjects.length > 0 && (!filters.view || filters.view === 'cards') && (
+        <>
+          {/* Active Projects */}
+          {activeProjects.length > 0 && (
+            <div style={{ marginBottom: '40px' }}>
+              <h2 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>
+                Active Projects
+                <span
+                  style={{
+                    marginLeft: '10px',
+                    fontSize: '0.875rem',
+                    fontFamily: 'var(--font-body)',
+                    color: 'var(--color-stone-400)',
+                    fontWeight: 400,
+                  }}
+                >
+                  {activeProjects.length}
+                </span>
+              </h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {activeProjects.map((project, index) => (
+                  <div key={project.id} style={{ animationDelay: `${index * 50}ms` }} className="animate-slide-in-up">
+                    <ProjectCard project={project} />
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
+          )}
+
+          {/* Completed Projects */}
+          {completedProjects.length > 0 && (
+            <div>
+              <h2 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <CheckCircle2 size={20} color="var(--color-success)" />
+                  Completed
+                  <span
+                    style={{
+                      fontSize: '0.875rem',
+                      fontFamily: 'var(--font-body)',
+                      color: 'var(--color-stone-400)',
+                      fontWeight: 400,
+                    }}
+                  >
+                    {completedProjects.length}
+                  </span>
+                </span>
+              </h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {completedProjects.map((project, index) => (
+                  <div key={project.id} style={{ animationDelay: `${index * 50}ms` }} className="animate-slide-in-up">
+                    <ProjectCard project={project} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
