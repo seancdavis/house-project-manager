@@ -8,6 +8,8 @@ interface BadgeProps {
   variant?: BadgeVariant;
   size?: BadgeSize;
   dot?: boolean;
+  className?: string;
+  onClick?: () => void;
 }
 
 const variantStyles: Record<BadgeVariant, React.CSSProperties> = {
@@ -56,9 +58,13 @@ export function Badge({
   variant = 'default',
   size = 'sm',
   dot = false,
+  className,
+  onClick,
 }: BadgeProps) {
   return (
     <span
+      className={className}
+      onClick={onClick}
       style={{
         display: 'inline-flex',
         alignItems: 'center',
@@ -66,6 +72,7 @@ export function Badge({
         fontWeight: 500,
         borderRadius: 'var(--radius-full)',
         whiteSpace: 'nowrap',
+        cursor: onClick ? 'pointer' : undefined,
         ...variantStyles[variant],
         ...sizeStyles[size],
       }}
@@ -110,6 +117,20 @@ export function TypeBadge({ type }: { type: string }) {
   };
 
   const { label, variant } = config[type] || { label: type, variant: 'default' as BadgeVariant };
+
+  return <Badge variant={variant}>{label}</Badge>;
+}
+
+export function PriorityBadge({ priority }: { priority: string | null }) {
+  if (!priority) return null;
+
+  const config: Record<string, { label: string; variant: BadgeVariant }> = {
+    low: { label: 'Low Priority', variant: 'neutral' },
+    medium: { label: 'Medium Priority', variant: 'info' },
+    high: { label: 'High Priority', variant: 'warning' },
+  };
+
+  const { label, variant } = config[priority] || { label: priority, variant: 'default' as BadgeVariant };
 
   return <Badge variant={variant}>{label}</Badge>;
 }

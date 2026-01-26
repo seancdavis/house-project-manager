@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Edit2, Trash2, Calendar, User, Wrench } from 'lucide-react';
+import { ArrowLeft, Edit2, Trash2, Calendar, User, Wrench, DollarSign, Flag, Tag } from 'lucide-react';
 import { useProject, useUpdateProject, useDeleteProject } from '../hooks/useProjects';
 import { useMembers } from '../hooks/useMembers';
 import { ProjectForm } from '../components/projects/ProjectForm';
 import { TaskList } from '../components/tasks/TaskList';
-import { Card, Button, StatusBadge, TypeBadge, Avatar, Modal, PageLoading, RequireAuthButton } from '../components/ui';
+import { Card, Button, StatusBadge, TypeBadge, PriorityBadge, Badge, Avatar, Modal, PageLoading, RequireAuthButton } from '../components/ui';
 import type { ProjectInput } from '../types';
 
 export function ProjectDetailPage() {
@@ -73,8 +73,19 @@ export function ProjectDetailPage() {
             <h1 style={{ fontSize: '1.75rem', margin: 0 }}>{project.title}</h1>
             <StatusBadge status={project.status} />
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
             <TypeBadge type={project.type} />
+            <PriorityBadge priority={project.priority} />
+            {project.tags && project.tags.length > 0 && (
+              <>
+                {project.tags.map(tag => (
+                  <Badge key={tag.id} variant="default">
+                    <Tag size={12} style={{ marginRight: '4px' }} />
+                    {tag.name}
+                  </Badge>
+                ))}
+              </>
+            )}
           </div>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
@@ -223,6 +234,63 @@ export function ProjectDetailPage() {
                   <span style={{ color: 'var(--color-stone-400)' }}>Not set</span>
                 )}
               </div>
+
+              {/* Budget */}
+              {(project.estimatedBudget !== null || project.actualBudget !== null) && (
+                <div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      fontSize: '0.8125rem',
+                      color: 'var(--color-stone-500)',
+                      marginBottom: '8px',
+                    }}
+                  >
+                    <DollarSign size={14} />
+                    Budget
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    {project.estimatedBudget !== null && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ color: 'var(--color-stone-500)' }}>Estimated:</span>
+                        <span style={{ fontWeight: 500 }}>
+                          ${(project.estimatedBudget / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                    )}
+                    {project.actualBudget !== null && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ color: 'var(--color-stone-500)' }}>Actual:</span>
+                        <span style={{ fontWeight: 500 }}>
+                          ${(project.actualBudget / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Priority */}
+              {project.priority && (
+                <div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      fontSize: '0.8125rem',
+                      color: 'var(--color-stone-500)',
+                      marginBottom: '8px',
+                    }}
+                  >
+                    <Flag size={14} />
+                    Priority
+                  </div>
+                  <PriorityBadge priority={project.priority} />
+                </div>
+              )}
 
               {/* Timestamps */}
               <div

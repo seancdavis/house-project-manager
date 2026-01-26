@@ -175,3 +175,67 @@ h1, h2, h3, h4, h5, h6 {
 .animate-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+/* Tag Selector */
+.tag-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.selected-tags,
+.available-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tag-badge.clickable {
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.tag-badge.clickable:hover {
+  background-color: var(--color-primary-100);
+  border-color: var(--color-primary-300);
+}
+
+.tag-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  margin-left: 2px;
+  border-radius: var(--radius-full);
+  color: inherit;
+  opacity: 0.7;
+  transition: opacity var(--transition-fast);
+}
+
+.tag-remove:hover {
+  opacity: 1;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.new-tag-input {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.new-tag-input input {
+  flex: 1;
+}
+
+.new-tag-input button {
+  flex-shrink: 0;
+}

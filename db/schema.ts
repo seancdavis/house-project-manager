@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, integer } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, integer, primaryKey } from 'drizzle-orm/pg-core';
 
 export const members = pgTable('members', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -16,9 +16,12 @@ export const projects = pgTable('projects', {
   description: text('description'),
   type: text('type').notNull(), // 'diy' | 'contractor' | 'handyman'
   status: text('status').notNull().default('not_started'),
+  priority: text('priority'), // 'low' | 'medium' | 'high' | null
   ownerId: uuid('owner_id').references(() => members.id),
   implementerId: uuid('implementer_id').references(() => members.id),
   targetDate: timestamp('target_date'),
+  estimatedBudget: integer('estimated_budget'), // in cents
+  actualBudget: integer('actual_budget'), // in cents
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   completedAt: timestamp('completed_at'),
@@ -35,3 +38,18 @@ export const tasks = pgTable('tasks', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   completedAt: timestamp('completed_at'),
 });
+
+// Tags for projects - stored separately so users can reuse across projects
+export const tags = pgTable('tags', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: text('name').notNull().unique(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+// Many-to-many relationship between projects and tags
+export const projectTags = pgTable('project_tags', {
+  projectId: uuid('project_id').references(() => projects.id, { onDelete: 'cascade' }).notNull(),
+  tagId: uuid('tag_id').references(() => tags.id, { onDelete: 'cascade' }).notNull(),
+}, (table) => ({
+  pk: primaryKey({ columns: [table.projectId, table.tagId] }),
+}));

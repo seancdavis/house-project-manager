@@ -28,7 +28,7 @@ Always use these reusable components rather than creating inline styles:
 - `Input`, `Textarea`, `Select` - Form inputs with consistent styling
 - `InputWrapper` - Label + input + error message wrapper
 - `Avatar` - User avatar with initials and color
-- `Badge`, `StatusBadge`, `TypeBadge` - Status and type indicators
+- `Badge`, `StatusBadge`, `TypeBadge`, `PriorityBadge` - Status, type, and priority indicators
 - `Modal` - Dialog with backdrop
 - `EmptyState` - Placeholder for empty lists
 - `Loading`, `PageLoading` - Loading indicators
@@ -84,8 +84,24 @@ const { register, handleSubmit, formState: { errors } } = useForm<FormType>();
 
 Tables defined in `db/schema.ts`:
 - `members`: id, name, type, initials, color
-- `projects`: id, title, description, type, status, ownerId, implementerId, targetDate
+- `projects`: id, title, description, type, status, priority, ownerId, implementerId, targetDate, estimatedBudget, actualBudget, completedAt
 - `tasks`: id, projectId, title, status, assigneeId, sortOrder
+- `tags`: id, name (unique)
+- `projectTags`: projectId, tagId (junction table for many-to-many relationship)
+
+### Budget Fields
+
+Budget values are stored in **cents** (integers) to avoid floating point issues. When displaying:
+- Divide by 100 for display: `(project.estimatedBudget / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })`
+- Multiply by 100 when saving: `Math.round(inputValue * 100)`
+
+### Tags
+
+Projects can have multiple open-ended tags. The `useTags` hook provides:
+- `useTags()`: Fetch all tags
+- `useCreateTag()`: Create a new tag
+
+Tags are normalized to lowercase when created. The ProjectForm component handles tag selection and creation.
 
 ## File Naming Conventions
 
