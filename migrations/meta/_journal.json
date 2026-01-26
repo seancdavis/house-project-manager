@@ -15,6 +15,13 @@
       "when": 1769433595626,
       "tag": "0001_strong_hulk",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1769437321971,
+      "tag": "0002_lucky_peter_quill",
+      "breakpoints": true
     }
   ]
 }

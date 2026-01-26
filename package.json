@@ -13,6 +13,7 @@
     "db:studio": "netlify dev:exec drizzle-kit studio"
   },
   "dependencies": {
+    "@netlify/blobs": "^10.5.0",
     "@netlify/neon": "^0.1.0",
     "@tanstack/react-query": "^5.90.16",
     "drizzle-orm": "^0.45.1",

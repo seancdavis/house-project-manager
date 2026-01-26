@@ -52,6 +52,19 @@ export interface Tag {
   createdAt: string;
 }
 
+export interface Photo {
+  id: string;
+  projectId: string;
+  blobKey: string;
+  filename: string;
+  caption: string | null;
+  mimeType: string;
+  size: number;
+  uploadedById: string | null;
+  createdAt: string;
+  url?: string; // Populated from Netlify Image CDN
+}
+
 // Form input types (without generated fields)
 export interface MemberInput {
   name: string;

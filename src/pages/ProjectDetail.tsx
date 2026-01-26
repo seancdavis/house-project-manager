@@ -5,6 +5,7 @@ import { useProject, useUpdateProject, useDeleteProject } from '../hooks/useProj
 import { useMembers } from '../hooks/useMembers';
 import { ProjectForm } from '../components/projects/ProjectForm';
 import { TaskList } from '../components/tasks/TaskList';
+import { PhotoGallery } from '../components/photos/PhotoGallery';
 import { Card, Button, StatusBadge, TypeBadge, PriorityBadge, Badge, Avatar, Modal, PageLoading, RequireAuthButton } from '../components/ui';
 import type { ProjectInput } from '../types';
 
@@ -141,11 +142,19 @@ export function ProjectDetailPage() {
           )}
 
           {/* Tasks */}
-          <Card>
+          <Card style={{ marginBottom: '24px' }}>
             <h3 style={{ fontSize: '1rem', marginBottom: '16px', color: 'var(--color-stone-700)' }}>
               Tasks
             </h3>
             <TaskList projectId={project.id} />
+          </Card>
+
+          {/* Photos */}
+          <Card>
+            <h3 style={{ fontSize: '1rem', marginBottom: '16px', color: 'var(--color-stone-700)' }}>
+              Photos
+            </h3>
+            <PhotoGallery projectId={project.id} />
           </Card>
         </div>
 

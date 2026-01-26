@@ -53,3 +53,16 @@ export const projectTags = pgTable('project_tags', {
 }, (table) => ({
   pk: primaryKey({ columns: [table.projectId, table.tagId] }),
 }));
+
+// Photos for projects - stored in Netlify Blobs
+export const photos = pgTable('photos', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  projectId: uuid('project_id').references(() => projects.id, { onDelete: 'cascade' }).notNull(),
+  blobKey: text('blob_key').notNull(), // Key in Netlify Blobs store
+  filename: text('filename').notNull(), // Original filename
+  caption: text('caption'),
+  mimeType: text('mime_type').notNull(),
+  size: integer('size').notNull(), // File size in bytes
+  uploadedById: uuid('uploaded_by_id').references(() => members.id),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});

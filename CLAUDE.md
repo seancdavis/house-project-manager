@@ -103,6 +103,24 @@ Projects can have multiple open-ended tags. The `useTags` hook provides:
 
 Tags are normalized to lowercase when created. The ProjectForm component handles tag selection and creation.
 
+### Project Photos
+
+Photos are stored in Netlify Blobs and served via Netlify Image CDN. The `photos` table stores metadata:
+- `blobKey`: Reference to the file in Netlify Blobs
+- `projectId`: Associated project
+- `filename`, `mimeType`, `size`: File metadata
+- `caption`: Optional caption
+- `uploadedById`: Who uploaded it
+
+Use the `usePhotos` hook:
+- `usePhotos(projectId)`: Get photos for a project
+- `useUploadPhoto()`: Upload a new photo
+- `useDeletePhoto()`: Delete a photo
+
+Photo URLs are constructed as: `/.netlify/images?url=/.netlify/blobs/project-photos/${blobKey}`
+
+The `PhotoGallery` component in `src/components/photos/PhotoGallery.tsx` handles upload and display.
+
 ## File Naming Conventions
 
 - Pages: PascalCase in `src/pages/` (e.g., `ProjectDetail.tsx`)
