@@ -159,6 +159,15 @@ Tasks are ordered by `sortOrder` field. The TaskList component supports:
 
 Reordering uses batch update via `PUT /api/tasks/reorder` with `{ taskIds: string[] }`.
 
+### Members Color Picker
+
+The MemberForm includes an enhanced color picker with:
+- **Preset palette**: 16 colors organized by category (Warm, Cool, Rich, Earth)
+- **Custom color**: Native color picker + hex input for any color
+- **Live preview**: Avatar updates in real-time as color changes
+
+Colors are stored as hex values (e.g., `#B45309`).
+
 ## File Naming Conventions
 
 - Pages: PascalCase in `src/pages/` (e.g., `ProjectDetail.tsx`)
