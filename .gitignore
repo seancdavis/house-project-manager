@@ -11,6 +11,9 @@ dist-ssr
 !.vscode/extensions.json
 *.sw?
 
+# macOS
+.DS_Store
+
 # Logs
 logs
 *.log
