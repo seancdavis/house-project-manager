@@ -67,7 +67,7 @@ export default async (req: Request, context: Context) => {
 
       return new Response(JSON.stringify({
         ...updated,
-        url: `/.netlify/images?url=/.netlify/blobs/${STORE_NAME}/${updated.blobKey}`,
+        url: `/api/photos/${updated.id}/image`,
       }), { headers });
     } catch (error) {
       console.error('Update error:', error);

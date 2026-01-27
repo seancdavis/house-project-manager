@@ -30,7 +30,7 @@ export default async (req: Request, context: Context) => {
     // Add URLs for each photo
     const photosWithUrls = projectPhotos.map(photo => ({
       ...photo,
-      url: `/.netlify/images?url=/.netlify/blobs/${STORE_NAME}/${photo.blobKey}`,
+      url: `/api/photos/${photo.id}/image`,
     }));
 
     return new Response(JSON.stringify(photosWithUrls), { headers });
@@ -38,13 +38,11 @@ export default async (req: Request, context: Context) => {
 
   if (req.method === 'POST') {
     try {
-      const formData = await req.formData();
-      const file = formData.get('file') as File | null;
-      const caption = formData.get('caption') as string | null;
-      const uploadedById = formData.get('uploadedById') as string | null;
+      const body = await req.json();
+      const { file: base64File, filename, mimeType, size, caption, uploadedById } = body;
 
-      if (!file) {
-        return new Response(JSON.stringify({ error: 'File is required' }), {
+      if (!base64File || !filename || !mimeType) {
+        return new Response(JSON.stringify({ error: 'File, filename, and mimeType are required' }), {
           status: 400,
           headers
         });
@@ -52,7 +50,7 @@ export default async (req: Request, context: Context) => {
 
       // Validate file type
       const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-      if (!allowedTypes.includes(file.type)) {
+      if (!allowedTypes.includes(mimeType)) {
         return new Response(JSON.stringify({ error: 'Invalid file type. Allowed: JPEG, PNG, GIF, WebP' }), {
           status: 400,
           headers
@@ -62,15 +60,17 @@ export default async (req: Request, context: Context) => {
       // Generate unique blob key
       const timestamp = Date.now();
       const randomStr = Math.random().toString(36).substring(2, 8);
-      const extension = file.name.split('.').pop() || 'jpg';
+      const extension = filename.split('.').pop() || 'jpg';
       const blobKey = `${projectId}/${timestamp}-${randomStr}.${extension}`;
 
+      // Decode base64 to buffer
+      const buffer = Buffer.from(base64File, 'base64');
+
       // Upload to Netlify Blobs
-      const arrayBuffer = await file.arrayBuffer();
-      await store.set(blobKey, arrayBuffer, {
+      await store.set(blobKey, buffer, {
         metadata: {
-          contentType: file.type,
-          originalFilename: file.name,
+          contentType: mimeType,
+          originalFilename: filename,
         }
       });
 
@@ -78,16 +78,16 @@ export default async (req: Request, context: Context) => {
       const [newPhoto] = await db.insert(photos).values({
         projectId,
         blobKey,
-        filename: file.name,
+        filename,
         caption: caption || null,
-        mimeType: file.type,
-        size: file.size,
+        mimeType,
+        size: size || buffer.length,
         uploadedById: uploadedById || null,
       }).returning();
 
       return new Response(JSON.stringify({
         ...newPhoto,
-        url: `/.netlify/images?url=/.netlify/blobs/${STORE_NAME}/${blobKey}`,
+        url: `/api/photos/${newPhoto.id}/image`,
       }), {
         status: 201,
         headers

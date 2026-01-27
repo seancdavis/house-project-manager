@@ -104,7 +104,7 @@ export function PhotoGallery({ projectId }: PhotoGalleryProps) {
               }}
             >
               <img
-                src={`${photo.url}&w=300&h=300&fit=cover`}
+                src={photo.url}
                 alt={photo.caption || photo.filename}
                 style={{
                   width: '100%',
@@ -142,7 +142,7 @@ export function PhotoGallery({ projectId }: PhotoGalleryProps) {
               }}
             >
               <img
-                src={`${selectedPhoto.url}&w=1200`}
+                src={selectedPhoto.url}
                 alt={selectedPhoto.caption || selectedPhoto.filename}
                 style={{
                   width: '100%',
