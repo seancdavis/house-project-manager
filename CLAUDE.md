@@ -48,9 +48,10 @@ Always use these reusable components rather than creating inline styles:
 - `InputWrapper` - Label + input + error message wrapper
 - `Avatar` - User avatar with initials and color
 - `Badge`, `StatusBadge`, `TypeBadge`, `PriorityBadge` - Status, type, and priority indicators
-- `Modal` - Dialog with backdrop
+- `Modal` - Dialog with backdrop (title accepts ReactNode for custom content)
 - `EmptyState` - Placeholder for empty lists
 - `Loading`, `PageLoading` - Loading indicators
+- `InlineEdit` - Click-to-edit text field with Save/Cancel buttons. Variants: `default` (with background) and `title` (plain text for headings)
 
 ### Icons
 
@@ -64,11 +65,20 @@ Use Lucide React for all icons. Import from `lucide-react`.
 
 ## Key Patterns
 
-### URL-based State
+### URL-based State & Routing
 
-**IMPORTANT**: Any action that adjusts a view (sorting, filtering) should result in a URL change so it can be shared and bookmarked.
+**IMPORTANT**: Every unique view should have its own route so it can be shared and bookmarked.
 
-Use the `useUrlState` hook from `src/hooks/useUrlState.ts`:
+**Nested routes** for predictable, single-item views:
+- `/projects/:id` - Project detail
+- `/projects/:id/photos/:photoId` - Photo modal within project
+- `/members/:id` - Member detail/edit modal
+
+**Query params** for views with many filter/sort combinations:
+- `/projects?status=in_progress&sort=title` - Filtered project list
+- `/members?sort=name&order=asc` - Sorted member list
+
+Use the `useUrlState` hook from `src/hooks/useUrlState.ts` for query param state:
 ```tsx
 const [filters, setFilters, resetFilters] = useProjectFilters();
 // filters.status, filters.type, filters.owner, filters.sort, filters.order, filters.view
@@ -136,21 +146,30 @@ Tags are normalized to lowercase when created. The ProjectForm component handles
 
 ### Project Photos
 
-Photos are stored in Netlify Blobs and served via Netlify Image CDN. The `photos` table stores metadata:
+Photos are stored in Netlify Blobs and served via a custom endpoint. The `photos` table stores metadata:
 - `blobKey`: Reference to the file in Netlify Blobs
 - `projectId`: Associated project
-- `filename`, `mimeType`, `size`: File metadata
-- `caption`: Optional caption
+- `filename`, `mimeType`, `size`: File metadata (filename is editable)
+- `caption`: Optional caption (editable)
 - `uploadedById`: Who uploaded it
 
-Use the `usePhotos` hook:
+**Photo upload**: Files are base64-encoded on the client and sent as JSON to the server (Netlify Functions don't support FormData for binary uploads).
+
+Use the `usePhotos` hooks:
 - `usePhotos(projectId)`: Get photos for a project
-- `useUploadPhoto()`: Upload a new photo
+- `useUploadPhoto()`: Upload a new photo (handles base64 encoding)
+- `useUpdatePhoto()`: Update filename or caption
 - `useDeletePhoto()`: Delete a photo
 
-Photo URLs are constructed as: `/.netlify/images?url=/.netlify/blobs/project-photos/${blobKey}`
+Photo URLs are served via: `/api/photos/:id/image`
 
-The `PhotoGallery` component in `src/components/photos/PhotoGallery.tsx` handles upload and display.
+Photos have their own nested routes: `/projects/:id/photos/:photoId` opens the photo modal.
+
+The `PhotoGallery` component in `src/components/photos/PhotoGallery.tsx` handles:
+- Upload with drag-and-drop or click
+- Grid display with filename and caption (truncated)
+- Modal view with inline editing for filename (in title) and caption
+- File size display (KB or MB)
 
 ### Notes
 
@@ -172,7 +191,7 @@ Users can only edit/delete their own notes. The `NotesSection` component handles
 
 Tasks are ordered by `sortOrder` field. The TaskList component supports:
 - **Inline editing**: Click on task title to edit, press Enter to save or Escape to cancel
-- **Reordering**: Use up/down arrows to reorder tasks within the same list
+- **Drag-and-drop reordering**: Uses `@dnd-kit` library for smooth reordering within the list
 - **Status toggle**: Click checkbox to mark complete/incomplete
 - **Delete**: Remove tasks with delete button
 
