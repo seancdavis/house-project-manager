@@ -32,7 +32,7 @@ export function useUploadPhoto() {
 export function useUpdatePhoto() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: { caption?: string } }) =>
+    mutationFn: ({ id, data }: { id: string; data: { caption?: string; filename?: string } }) =>
       api.updatePhoto(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['photos'] });

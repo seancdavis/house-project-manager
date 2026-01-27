@@ -51,7 +51,7 @@ export async function uploadPhoto(
   return response.json();
 }
 
-export function updatePhoto(id: string, data: { caption?: string }): Promise<Photo> {
+export function updatePhoto(id: string, data: { caption?: string; filename?: string }): Promise<Photo> {
   return patch<Photo>(`/photos/${id}`, data);
 }
 

@@ -54,6 +54,7 @@ export default async (req: Request, context: Context) => {
       const [updated] = await db.update(photos)
         .set({
           caption: body.caption !== undefined ? body.caption : undefined,
+          filename: body.filename !== undefined ? body.filename : undefined,
         })
         .where(eq(photos.id, photoId))
         .returning();

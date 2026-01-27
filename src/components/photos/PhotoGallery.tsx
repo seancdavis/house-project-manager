@@ -1,8 +1,9 @@
 import { useState, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Upload, Trash2, ImageIcon } from 'lucide-react';
-import { usePhotos, useUploadPhoto, useDeletePhoto } from '../../hooks/usePhotos';
+import { usePhotos, useUploadPhoto, useUpdatePhoto, useDeletePhoto } from '../../hooks/usePhotos';
 import { useCurrentUser } from '../../context/UserContext';
-import { Modal, Button, EmptyState, Loading } from '../ui';
+import { Modal, Button, EmptyState, Loading, InlineEdit } from '../ui';
 import type { Photo } from '../../types';
 
 interface PhotoGalleryProps {
@@ -10,15 +11,28 @@ interface PhotoGalleryProps {
 }
 
 export function PhotoGallery({ projectId }: PhotoGalleryProps) {
+  const { photoId } = useParams<{ photoId?: string }>();
+  const navigate = useNavigate();
   const { data: photos, isLoading } = usePhotos(projectId);
   const uploadPhoto = useUploadPhoto();
+  const updatePhoto = useUpdatePhoto();
   const deletePhoto = useDeletePhoto();
   const { currentUser } = useCurrentUser();
 
-  const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadCaption, setUploadCaption] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Get selected photo from URL
+  const selectedPhoto = photoId ? photos?.find(p => p.id === photoId) || null : null;
+
+  const setSelectedPhoto = (photo: Photo | null) => {
+    if (photo) {
+      navigate(`/projects/${projectId}/photos/${photo.id}`);
+    } else {
+      navigate(`/projects/${projectId}`);
+    }
+  };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -95,26 +109,54 @@ export function PhotoGallery({ projectId }: PhotoGalleryProps) {
               key={photo.id}
               onClick={() => setSelectedPhoto(photo)}
               style={{
-                position: 'relative',
-                aspectRatio: '1',
-                borderRadius: 'var(--radius-md)',
-                overflow: 'hidden',
                 cursor: 'pointer',
-                backgroundColor: 'var(--color-stone-100)',
               }}
             >
-              <img
-                src={photo.url}
-                alt={photo.caption || photo.filename}
+              <div
                 style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  transition: 'transform var(--transition-normal)',
+                  position: 'relative',
+                  aspectRatio: '1',
+                  borderRadius: 'var(--radius-md)',
+                  overflow: 'hidden',
+                  backgroundColor: 'var(--color-stone-100)',
+                  marginBottom: '8px',
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-              />
+              >
+                <img
+                  src={photo.url}
+                  alt={photo.caption || photo.filename}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                  }}
+                />
+              </div>
+              <div
+                style={{
+                  fontSize: '0.8125rem',
+                  fontWeight: 500,
+                  color: 'var(--color-stone-700)',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {photo.filename}
+              </div>
+              {photo.caption && (
+                <div
+                  style={{
+                    fontSize: '0.75rem',
+                    color: 'var(--color-stone-500)',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {photo.caption}
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -130,7 +172,18 @@ export function PhotoGallery({ projectId }: PhotoGalleryProps) {
       <Modal
         isOpen={!!selectedPhoto}
         onClose={() => setSelectedPhoto(null)}
-        title={selectedPhoto?.caption || selectedPhoto?.filename || 'Photo'}
+        title={
+          selectedPhoto ? (
+            <InlineEdit
+              value={selectedPhoto.filename}
+              onSave={(filename) => updatePhoto.mutate({ id: selectedPhoto.id, data: { filename } })}
+              required
+              disabled={!currentUser}
+              isPending={updatePhoto.isPending}
+              variant="title"
+            />
+          ) : 'Photo'
+        }
         size="lg"
       >
         {selectedPhoto && (
@@ -154,6 +207,17 @@ export function PhotoGallery({ projectId }: PhotoGalleryProps) {
               />
             </div>
 
+            {/* Caption */}
+            <div style={{ marginBottom: '16px' }}>
+              <InlineEdit
+                value={selectedPhoto.caption || ''}
+                onSave={(caption) => updatePhoto.mutate({ id: selectedPhoto.id, data: { caption: caption || undefined } })}
+                placeholder={currentUser ? 'Click to add a caption...' : 'No caption'}
+                disabled={!currentUser}
+                isPending={updatePhoto.isPending}
+              />
+            </div>
+
             <div
               style={{
                 display: 'flex',
@@ -162,11 +226,11 @@ export function PhotoGallery({ projectId }: PhotoGalleryProps) {
               }}
             >
               <div style={{ color: 'var(--color-stone-500)', fontSize: '0.875rem' }}>
-                {selectedPhoto.filename}
-                <span style={{ margin: '0 8px' }}>·</span>
-                {(selectedPhoto.size / 1024).toFixed(1)} KB
+                {selectedPhoto.size >= 1024 * 1024
+                  ? `${(selectedPhoto.size / (1024 * 1024)).toFixed(1)} MB`
+                  : `${(selectedPhoto.size / 1024).toFixed(1)} KB`}
               </div>
-{currentUser && (
+              {currentUser && (
                 <Button
                   variant="ghost"
                   icon={<Trash2 size={16} />}
