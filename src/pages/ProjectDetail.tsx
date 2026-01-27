@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Edit2, Trash2, Calendar, User, Wrench, DollarSign, Flag, Tag } from 'lucide-react';
+import { ArrowLeft, Edit2, Calendar, User, Wrench, DollarSign, Flag, Tag } from 'lucide-react';
 import { useProject, useUpdateProject, useDeleteProject } from '../hooks/useProjects';
 import { useMembers } from '../hooks/useMembers';
 import { useCurrentUser } from '../context/UserContext';
@@ -67,76 +67,81 @@ export function ProjectDetailPage() {
       <ReadOnlyBanner />
 
       {/* Header */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          marginBottom: '24px',
-        }}
-      >
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-            <h1 style={{ fontSize: '1.75rem', margin: 0 }}>{project.title}</h1>
-            <StatusBadge status={project.status} />
-            <TypeBadge type={project.type} />
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-            <PriorityBadge priority={project.priority} />
-            {project.tags && project.tags.length > 0 && (
-              <>
-                {project.tags.map(tag => (
-                  <Badge key={tag.id} variant="default">
-                    <Tag size={12} style={{ marginRight: '4px' }} />
-                    {tag.name}
-                  </Badge>
-                ))}
-              </>
-            )}
-          </div>
+      <div style={{ marginBottom: '24px' }}>
+        <h1 style={{ fontSize: '1.75rem', margin: '0 0 12px 0' }}>{project.title}</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          <StatusBadge status={project.status} />
+          <TypeBadge type={project.type} />
+          <PriorityBadge priority={project.priority} />
+          {project.tags && project.tags.length > 0 && (
+            <>
+              {project.tags.map(tag => (
+                <Badge key={tag.id} variant="default">
+                  <Tag size={12} style={{ marginRight: '4px' }} />
+                  {tag.name}
+                </Badge>
+              ))}
+            </>
+          )}
+          {canEdit && (
+            <button
+              onClick={() => setIsEditing(true)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                background: 'none',
+                border: 'none',
+                padding: 0,
+                color: 'var(--color-primary-600)',
+                fontSize: '0.875rem',
+                cursor: 'pointer',
+              }}
+            >
+              <Edit2 size={14} />
+              Edit details
+            </button>
+          )}
         </div>
-        {canEdit && (
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <Button variant="secondary" size="sm" onClick={() => setIsEditing(true)} icon={<Edit2 size={16} />}>
-              Edit
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => setShowDeleteConfirm(true)} icon={<Trash2 size={16} />}>
-              Delete
-            </Button>
-          </div>
-        )}
       </div>
 
       {/* Edit Modal */}
       <Modal isOpen={isEditing} onClose={() => setIsEditing(false)} title="Edit Project" size="md">
-        <ProjectForm project={project} onSubmit={handleUpdate} onCancel={() => setIsEditing(false)} />
-      </Modal>
-
-      {/* Delete Confirmation Modal */}
-      <Modal isOpen={showDeleteConfirm} onClose={() => setShowDeleteConfirm(false)} title="Delete Project" size="sm">
-        <p style={{ marginBottom: '24px', color: 'var(--color-stone-600)' }}>
-          Are you sure you want to delete this project? This will also delete all tasks associated with it. This action cannot be undone.
-        </p>
-        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-          <Button variant="secondary" onClick={() => setShowDeleteConfirm(false)}>
-            Cancel
-          </Button>
-          <Button variant="danger" onClick={handleDelete}>
-            Delete Project
-          </Button>
-        </div>
+        {showDeleteConfirm ? (
+          <>
+            <p style={{ marginBottom: '24px', color: 'var(--color-stone-600)' }}>
+              Are you sure you want to delete this project? This will also delete all tasks associated with it. This action cannot be undone.
+            </p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <Button variant="secondary" onClick={() => setShowDeleteConfirm(false)}>
+                Cancel
+              </Button>
+              <Button variant="danger" onClick={handleDelete}>
+                Delete Project
+              </Button>
+            </div>
+          </>
+        ) : (
+          <>
+            <ProjectForm project={project} onSubmit={handleUpdate} onCancel={() => setIsEditing(false)} />
+            <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid var(--color-stone-100)' }}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowDeleteConfirm(true)}
+                style={{ color: 'var(--color-warning)' }}
+              >
+                Delete Project
+              </Button>
+            </div>
+          </>
+        )}
       </Modal>
 
       {/* Content Grid */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 320px',
-          gap: '24px',
-        }}
-      >
+      <div className="project-detail-grid">
         {/* Main Content */}
-        <div>
+        <div className="project-main">
           {/* Description */}
           {project.description && (
             <Card style={{ marginBottom: '24px' }}>
@@ -175,7 +180,7 @@ export function ProjectDetailPage() {
         </div>
 
         {/* Sidebar */}
-        <div>
+        <div className="project-sidebar">
           <Card>
             <h3 style={{ fontSize: '1rem', marginBottom: '20px', color: 'var(--color-stone-700)' }}>
               Details

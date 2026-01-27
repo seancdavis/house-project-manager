@@ -1,5 +1,22 @@
 import { useState } from 'react';
-import { Plus, Check, Trash2, ListTodo, ChevronUp, ChevronDown, Edit2 } from 'lucide-react';
+import { Plus, Check, Trash2, ListTodo, GripVertical, Edit2 } from 'lucide-react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { useTasks, useCreateTask, useUpdateTask, useDeleteTask, useReorderTasks } from '../../hooks/useTasks';
 import { useCurrentUser } from '../../context/UserContext';
 import { Input, Button, Loading, EmptyState } from '../ui';
@@ -17,6 +34,17 @@ export function TaskList({ projectId }: TaskListProps) {
   const deleteTask = useDeleteTask(projectId);
   const reorderTasks = useReorderTasks(projectId);
   const [newTaskTitle, setNewTaskTitle] = useState('');
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const handleAddTask = (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,24 +70,18 @@ export function TaskList({ projectId }: TaskListProps) {
     updateTask.mutate({ id: task.id, data: { title: newTitle.trim() } });
   };
 
-  const handleMoveUp = (task: Task, tasksList: Task[]) => {
-    if (!currentUser) return;
-    const currentIndex = tasksList.findIndex(t => t.id === task.id);
-    if (currentIndex <= 0) return;
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id || !currentUser) return;
 
-    const newOrder = [...tasksList];
-    [newOrder[currentIndex - 1], newOrder[currentIndex]] = [newOrder[currentIndex], newOrder[currentIndex - 1]];
-    reorderTasks.mutate(newOrder.map(t => t.id));
-  };
+    const todoTasks = tasks?.filter(t => t.status !== 'done') || [];
+    const oldIndex = todoTasks.findIndex(t => t.id === active.id);
+    const newIndex = todoTasks.findIndex(t => t.id === over.id);
 
-  const handleMoveDown = (task: Task, tasksList: Task[]) => {
-    if (!currentUser) return;
-    const currentIndex = tasksList.findIndex(t => t.id === task.id);
-    if (currentIndex >= tasksList.length - 1) return;
-
-    const newOrder = [...tasksList];
-    [newOrder[currentIndex], newOrder[currentIndex + 1]] = [newOrder[currentIndex + 1], newOrder[currentIndex]];
-    reorderTasks.mutate(newOrder.map(t => t.id));
+    if (oldIndex !== -1 && newIndex !== -1) {
+      const newOrder = arrayMove(todoTasks, oldIndex, newIndex);
+      reorderTasks.mutate(newOrder.map(t => t.id));
+    }
   };
 
   if (isLoading) return <Loading size="sm" />;
@@ -95,28 +117,35 @@ export function TaskList({ projectId }: TaskListProps) {
         />
       )}
 
-      {/* Todo Tasks */}
+      {/* Todo Tasks - Sortable */}
       {todoTasks.length > 0 && (
-        <div style={{ marginBottom: '24px' }}>
-          {todoTasks.map((task, index) => (
-            <TaskItem
-              key={task.id}
-              task={task}
-              onToggle={() => handleToggleStatus(task)}
-              onDelete={() => handleDelete(task.id)}
-              onEdit={(newTitle) => handleEditTask(task, newTitle)}
-              onMoveUp={() => handleMoveUp(task, todoTasks)}
-              onMoveDown={() => handleMoveDown(task, todoTasks)}
-              disabled={!currentUser}
-              canMoveUp={index > 0}
-              canMoveDown={index < todoTasks.length - 1}
-              style={{ animationDelay: `${index * 30}ms` }}
-            />
-          ))}
-        </div>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={todoTasks.map(t => t.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div style={{ marginBottom: '24px' }}>
+              {todoTasks.map((task, index) => (
+                <SortableTaskItem
+                  key={task.id}
+                  task={task}
+                  onToggle={() => handleToggleStatus(task)}
+                  onDelete={() => handleDelete(task.id)}
+                  onEdit={(newTitle) => handleEditTask(task, newTitle)}
+                  disabled={!currentUser}
+                  style={{ animationDelay: `${index * 30}ms` }}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
       )}
 
-      {/* Done Tasks */}
+      {/* Done Tasks - Not sortable */}
       {doneTasks.length > 0 && (
         <div>
           <div
@@ -155,12 +184,37 @@ interface TaskItemProps {
   onToggle: () => void;
   onDelete: () => void;
   onEdit: (newTitle: string) => void;
-  onMoveUp?: () => void;
-  onMoveDown?: () => void;
   disabled?: boolean;
-  canMoveUp?: boolean;
-  canMoveDown?: boolean;
   style?: React.CSSProperties;
+  dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
+  isDragging?: boolean;
+}
+
+function SortableTaskItem(props: Omit<TaskItemProps, 'dragHandleProps' | 'isDragging'>) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: props.task.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 1 : undefined,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      <TaskItem
+        {...props}
+        dragHandleProps={{ ...attributes, ...listeners }}
+        isDragging={isDragging}
+      />
+    </div>
+  );
 }
 
 function TaskItem({
@@ -168,12 +222,10 @@ function TaskItem({
   onToggle,
   onDelete,
   onEdit,
-  onMoveUp,
-  onMoveDown,
   disabled,
-  canMoveUp,
-  canMoveDown,
   style,
+  dragHandleProps,
+  isDragging,
 }: TaskItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(task.title);
@@ -208,14 +260,32 @@ function TaskItem({
         gap: '12px',
         padding: '12px 16px',
         marginBottom: '8px',
-        backgroundColor: isDone ? 'var(--color-stone-50)' : 'var(--bg-card)',
+        backgroundColor: isDragging ? 'var(--color-stone-50)' : (isDone ? 'var(--color-stone-50)' : 'var(--bg-card)'),
         borderRadius: 'var(--radius-md)',
-        border: '1px solid var(--color-stone-100)',
-        transition: 'all var(--transition-fast)',
+        border: isDragging ? '1px solid var(--color-primary-300)' : '1px solid var(--color-stone-100)',
+        transition: isDragging ? 'none' : 'all var(--transition-fast)',
         opacity: disabled ? 0.7 : 1,
+        boxShadow: isDragging ? 'var(--shadow-md)' : undefined,
         ...style,
       }}
     >
+      {/* Drag Handle - only for non-done tasks when not disabled */}
+      {!isDone && !disabled && dragHandleProps && (
+        <div
+          {...dragHandleProps}
+          style={{
+            cursor: 'grab',
+            color: 'var(--color-stone-300)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            touchAction: 'none',
+          }}
+        >
+          <GripVertical size={16} />
+        </div>
+      )}
+
       {/* Checkbox */}
       <button
         onClick={onToggle}
@@ -276,48 +346,6 @@ function TaskItem({
       {/* Action Buttons */}
       {!disabled && !isEditing && (
         <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
-          {/* Reorder buttons - only for non-done tasks */}
-          {!isDone && onMoveUp && onMoveDown && (
-            <>
-              <button
-                onClick={onMoveUp}
-                disabled={!canMoveUp}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  padding: '4px',
-                  cursor: canMoveUp ? 'pointer' : 'not-allowed',
-                  color: canMoveUp ? 'var(--color-stone-400)' : 'var(--color-stone-200)',
-                  borderRadius: 'var(--radius-sm)',
-                  transition: 'all var(--transition-fast)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <ChevronUp size={16} />
-              </button>
-              <button
-                onClick={onMoveDown}
-                disabled={!canMoveDown}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  padding: '4px',
-                  cursor: canMoveDown ? 'pointer' : 'not-allowed',
-                  color: canMoveDown ? 'var(--color-stone-400)' : 'var(--color-stone-200)',
-                  borderRadius: 'var(--radius-sm)',
-                  transition: 'all var(--transition-fast)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <ChevronDown size={16} />
-              </button>
-            </>
-          )}
-
           {/* Edit button */}
           {!isDone && (
             <button
