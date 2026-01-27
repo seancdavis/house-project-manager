@@ -26,6 +26,7 @@ The application uses a clean, light, and data-focused design aesthetic.
 - Make buttons or cards too rounded/bubbly
 - Add unnecessary visual flourishes
 - Use heavy shadows or borders
+- Add hover movement/transform effects on cards (no translateY, scale, etc.)
 
 ### CSS Variables (defined in `src/index.css`)
 
@@ -42,7 +43,7 @@ The application uses a clean, light, and data-focused design aesthetic.
 Always use these reusable components rather than creating inline styles:
 
 - `Button` - Primary, secondary, ghost, danger variants
-- `Card` - Container with optional hover effect
+- `Card` - Container (hover prop adds shadow only, no movement)
 - `Input`, `Textarea`, `Select` - Form inputs with consistent styling
 - `InputWrapper` - Label + input + error message wrapper
 - `Avatar` - User avatar with initials and color

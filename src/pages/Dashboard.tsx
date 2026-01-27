@@ -32,6 +32,7 @@ export function DashboardPage() {
       icon: FolderKanban,
       color: 'var(--color-primary-500)',
       bgColor: 'var(--color-primary-50)',
+      link: '/projects',
     },
     {
       label: 'In Progress',
@@ -39,6 +40,7 @@ export function DashboardPage() {
       icon: Clock,
       color: 'var(--color-info)',
       bgColor: 'var(--color-info-light)',
+      link: '/projects?status=in_progress',
     },
     {
       label: 'On Hold',
@@ -46,6 +48,7 @@ export function DashboardPage() {
       icon: AlertCircle,
       color: 'var(--color-warning)',
       bgColor: 'var(--color-warning-light)',
+      link: '/projects?status=on_hold',
     },
     {
       label: 'Completed',
@@ -53,6 +56,7 @@ export function DashboardPage() {
       icon: CheckCircle2,
       color: 'var(--color-success)',
       bgColor: 'var(--color-success-light)',
+      link: '/projects?status=completed',
     },
   ];
 
@@ -148,41 +152,43 @@ export function DashboardPage() {
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <Card key={stat.label} padding="md">
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-                <div>
-                  <p style={{
-                    fontSize: '0.875rem',
-                    color: 'var(--color-stone-500)',
-                    marginBottom: '8px',
-                  }}>
-                    {stat.label}
-                  </p>
-                  <p style={{
-                    fontSize: '2rem',
-                    fontWeight: 600,
-                    color: 'var(--color-stone-900)',
-                    fontFamily: 'var(--font-body)',
-                    lineHeight: 1,
-                  }}>
-                    {stat.value}
-                  </p>
+            <Link key={stat.label} to={stat.link} style={{ textDecoration: 'none' }}>
+              <Card padding="md" hover>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                  <div>
+                    <p style={{
+                      fontSize: '0.875rem',
+                      color: 'var(--color-stone-500)',
+                      marginBottom: '8px',
+                    }}>
+                      {stat.label}
+                    </p>
+                    <p style={{
+                      fontSize: '2rem',
+                      fontWeight: 600,
+                      color: 'var(--color-stone-900)',
+                      fontFamily: 'var(--font-body)',
+                      lineHeight: 1,
+                    }}>
+                      {stat.value}
+                    </p>
+                  </div>
+                  <div
+                    style={{
+                      width: '44px',
+                      height: '44px',
+                      borderRadius: 'var(--radius-md)',
+                      backgroundColor: stat.bgColor,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Icon size={22} color={stat.color} />
+                  </div>
                 </div>
-                <div
-                  style={{
-                    width: '44px',
-                    height: '44px',
-                    borderRadius: 'var(--radius-md)',
-                    backgroundColor: stat.bgColor,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <Icon size={22} color={stat.color} />
-                </div>
-              </div>
-            </Card>
+              </Card>
+            </Link>
           );
         })}
       </div>

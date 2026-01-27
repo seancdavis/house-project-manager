@@ -15,7 +15,7 @@ export function ProjectCard({ project, compact = false }: ProjectCardProps) {
   const implementer = members?.find(m => m.id === project.implementerId);
 
   return (
-    <Card hover padding={compact ? 'sm' : 'md'}>
+    <Card padding={compact ? 'sm' : 'md'}>
       <Link
         to={`/projects/${project.id}`}
         style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}

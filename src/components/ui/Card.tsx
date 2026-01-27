@@ -36,13 +36,11 @@ export function Card({
       onMouseEnter={(e) => {
         if (hover) {
           e.currentTarget.style.boxShadow = 'var(--shadow-md)';
-          e.currentTarget.style.transform = 'translateY(-2px)';
         }
       }}
       onMouseLeave={(e) => {
         if (hover) {
           e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
-          e.currentTarget.style.transform = 'translateY(0)';
         }
       }}
       {...props}
