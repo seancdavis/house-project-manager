@@ -43,9 +43,9 @@ const hoverStyles: Record<ButtonVariant, React.CSSProperties> = {
 };
 
 const sizeStyles: Record<ButtonSize, React.CSSProperties> = {
-  sm: { padding: '6px 12px', fontSize: '0.875rem', gap: '6px' },
-  md: { padding: '10px 18px', fontSize: '0.9375rem', gap: '8px' },
-  lg: { padding: '14px 24px', fontSize: '1rem', gap: '10px' },
+  sm: { padding: '6px 12px', fontSize: '0.8125rem', gap: '6px' },
+  md: { padding: '8px 14px', fontSize: '0.875rem', gap: '6px' },
+  lg: { padding: '10px 18px', fontSize: '0.9375rem', gap: '8px' },
 };
 
 export function Button({

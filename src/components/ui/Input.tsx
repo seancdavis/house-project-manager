@@ -39,8 +39,8 @@ export function InputWrapper({ label, error, children }: InputWrapperProps) {
 const inputBaseStyles: React.CSSProperties = {
   display: 'block',
   width: '100%',
-  padding: '10px 14px',
-  fontSize: '0.9375rem',
+  padding: '8px 12px',
+  fontSize: '0.875rem',
   fontFamily: 'var(--font-body)',
   color: 'var(--color-stone-800)',
   backgroundColor: 'var(--bg-card)',

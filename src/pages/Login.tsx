@@ -63,8 +63,8 @@ export function LoginPage() {
           </div>
           <h1
             style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: '1.75rem',
+              fontSize: '1.5rem',
+              fontWeight: 600,
               color: 'var(--color-stone-900)',
               marginBottom: '8px',
             }}

@@ -94,8 +94,8 @@ export function Modal({
           }}
         >
           <h2 style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: '1.25rem',
+            fontSize: '1.0625rem',
+            fontWeight: 600,
             margin: 0,
           }}>
             {title}

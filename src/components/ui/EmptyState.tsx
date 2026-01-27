@@ -38,8 +38,8 @@ export function EmptyState({ icon, title, description, action }: EmptyStateProps
       )}
       <h3
         style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: '1.125rem',
+          fontSize: '1rem',
+          fontWeight: 600,
           color: 'var(--color-stone-700)',
           marginBottom: '8px',
         }}

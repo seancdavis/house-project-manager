@@ -27,8 +27,8 @@ export function ProjectCard({ project, compact = false }: ProjectCardProps) {
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px', flexWrap: 'wrap' }}>
               <h3
                 style={{
-                  fontSize: compact ? '1rem' : '1.0625rem',
-                  fontFamily: 'var(--font-display)',
+                  fontSize: compact ? '0.9375rem' : '1rem',
+                  fontWeight: 600,
                   color: 'var(--color-stone-900)',
                   margin: 0,
                 }}

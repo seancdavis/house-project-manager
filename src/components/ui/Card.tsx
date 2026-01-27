@@ -74,8 +74,9 @@ export function CardHeader({ children, action }: CardHeaderProps) {
 export function CardTitle({ children }: { children: ReactNode }) {
   return (
     <h3 style={{
-      fontFamily: 'var(--font-display)',
-      fontSize: '1.25rem',
+      fontFamily: 'var(--font-body)',
+      fontWeight: 600,
+      fontSize: '1rem',
       color: 'var(--color-stone-900)',
       margin: 0,
     }}>

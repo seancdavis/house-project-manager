@@ -25,6 +25,7 @@ export function AppLayout() {
         style={{
           width: 'var(--sidebar-width)',
           backgroundColor: 'var(--bg-sidebar)',
+          borderRight: '1px solid var(--color-stone-200)',
           display: 'flex',
           flexDirection: 'column',
           position: 'fixed',
@@ -37,8 +38,8 @@ export function AppLayout() {
         {/* Logo */}
         <div
           style={{
-            padding: '24px',
-            borderBottom: '1px solid rgba(255,255,255,0.1)',
+            padding: '20px 20px',
+            borderBottom: '1px solid var(--color-stone-200)',
           }}
         >
           <Link
@@ -46,14 +47,14 @@ export function AppLayout() {
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '12px',
+              gap: '10px',
               textDecoration: 'none',
             }}
           >
             <div
               style={{
-                width: '36px',
-                height: '36px',
+                width: '32px',
+                height: '32px',
                 borderRadius: 'var(--radius-md)',
                 background: 'linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-primary-600) 100%)',
                 display: 'flex',
@@ -61,13 +62,14 @@ export function AppLayout() {
                 justifyContent: 'center',
               }}
             >
-              <Home size={20} color="white" />
+              <Home size={18} color="white" />
             </div>
             <span
               style={{
                 fontFamily: 'var(--font-display)',
-                fontSize: '1.125rem',
-                color: 'white',
+                fontSize: '1rem',
+                fontWeight: 600,
+                color: 'var(--color-stone-900)',
               }}
             >
               House Projects
@@ -76,41 +78,42 @@ export function AppLayout() {
         </div>
 
         {/* Navigation */}
-        <nav style={{ flex: 1, padding: '16px 12px' }}>
+        <nav style={{ flex: 1, padding: '12px' }}>
           <ul style={{ listStyle: 'none' }}>
             {navItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.path);
               return (
-                <li key={item.path} style={{ marginBottom: '4px' }}>
+                <li key={item.path} style={{ marginBottom: '2px' }}>
                   <Link
                     to={item.path}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '12px',
-                      padding: '12px 16px',
+                      gap: '10px',
+                      padding: '10px 12px',
                       borderRadius: 'var(--radius-md)',
                       textDecoration: 'none',
-                      color: active ? 'white' : 'rgba(255,255,255,0.6)',
-                      backgroundColor: active ? 'rgba(255,255,255,0.1)' : 'transparent',
+                      fontSize: '0.875rem',
+                      color: active ? 'var(--color-primary-700)' : 'var(--color-stone-600)',
+                      backgroundColor: active ? 'var(--color-primary-50)' : 'transparent',
                       transition: 'all var(--transition-fast)',
                       fontWeight: active ? 500 : 400,
                     }}
                     onMouseEnter={(e) => {
                       if (!active) {
-                        e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
-                        e.currentTarget.style.color = 'rgba(255,255,255,0.9)';
+                        e.currentTarget.style.backgroundColor = 'var(--color-stone-100)';
+                        e.currentTarget.style.color = 'var(--color-stone-900)';
                       }
                     }}
                     onMouseLeave={(e) => {
                       if (!active) {
                         e.currentTarget.style.backgroundColor = 'transparent';
-                        e.currentTarget.style.color = 'rgba(255,255,255,0.6)';
+                        e.currentTarget.style.color = 'var(--color-stone-600)';
                       }
                     }}
                   >
-                    <Icon size={20} />
+                    <Icon size={18} />
                     <span>{item.label}</span>
                   </Link>
                 </li>
@@ -122,8 +125,8 @@ export function AppLayout() {
         {/* User Section */}
         <div
           style={{
-            padding: '16px',
-            borderTop: '1px solid rgba(255,255,255,0.1)',
+            padding: '12px',
+            borderTop: '1px solid var(--color-stone-200)',
           }}
         >
           {currentUser ? (
@@ -131,10 +134,10 @@ export function AppLayout() {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '12px',
-                padding: '12px',
+                gap: '10px',
+                padding: '10px',
                 borderRadius: 'var(--radius-md)',
-                backgroundColor: 'rgba(255,255,255,0.05)',
+                backgroundColor: 'var(--color-stone-50)',
               }}
             >
               <Avatar
@@ -145,7 +148,7 @@ export function AppLayout() {
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div
                   style={{
-                    color: 'white',
+                    color: 'var(--color-stone-900)',
                     fontSize: '0.875rem',
                     fontWeight: 500,
                     whiteSpace: 'nowrap',
@@ -157,7 +160,7 @@ export function AppLayout() {
                 </div>
                 <div
                   style={{
-                    color: 'rgba(255,255,255,0.5)',
+                    color: 'var(--color-stone-500)',
                     fontSize: '0.75rem',
                   }}
                 >
@@ -169,23 +172,23 @@ export function AppLayout() {
                 style={{
                   background: 'none',
                   border: 'none',
-                  padding: '8px',
+                  padding: '6px',
                   cursor: 'pointer',
-                  color: 'rgba(255,255,255,0.5)',
+                  color: 'var(--color-stone-400)',
                   borderRadius: 'var(--radius-sm)',
                   transition: 'all var(--transition-fast)',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.color = 'white';
-                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
+                  e.currentTarget.style.color = 'var(--color-stone-700)';
+                  e.currentTarget.style.backgroundColor = 'var(--color-stone-200)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.color = 'rgba(255,255,255,0.5)';
+                  e.currentTarget.style.color = 'var(--color-stone-400)';
                   e.currentTarget.style.backgroundColor = 'transparent';
                 }}
                 title="Sign out"
               >
-                <LogOut size={18} />
+                <LogOut size={16} />
               </button>
             </div>
           ) : (
@@ -196,7 +199,7 @@ export function AppLayout() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px',
-                padding: '12px',
+                padding: '10px 12px',
                 borderRadius: 'var(--radius-md)',
                 backgroundColor: 'var(--color-primary-600)',
                 color: 'white',
@@ -224,14 +227,14 @@ export function AppLayout() {
           flex: 1,
           marginLeft: 'var(--sidebar-width)',
           minHeight: '100vh',
-          backgroundColor: 'var(--bg-cream)',
+          backgroundColor: 'var(--bg-warm)',
         }}
       >
         <div
           style={{
             maxWidth: '1400px',
             margin: '0 auto',
-            padding: '32px 40px',
+            padding: '24px 32px',
           }}
         >
           <Outlet />

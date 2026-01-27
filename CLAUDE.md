@@ -8,16 +8,17 @@ House Project Manager is a React application for tracking home improvement proje
 
 ## Design System
 
-The application uses a custom "Warm Workshop" design aesthetic:
+The application uses a clean, light, and data-focused design aesthetic:
 
 ### CSS Variables (defined in `src/index.css`)
 
-- **Primary colors**: `--color-primary-*` (warm amber palette)
-- **Neutral colors**: `--color-stone-*` (warm stone grays)
-- **Accent colors**: `--color-success`, `--color-warning`, `--color-info`
-- **Backgrounds**: `--bg-cream`, `--bg-warm`, `--bg-card`
-- **Typography**: `--font-display` (DM Serif Display), `--font-body` (DM Sans)
-- **Spacing**: `--radius-*`, `--shadow-*`, `--transition-*`
+- **Primary colors**: `--color-primary-*` (clean blue palette)
+- **Neutral colors**: `--color-stone-*` (cool gray palette)
+- **Accent colors**: `--color-success`, `--color-warning`, `--color-info`, `--color-amber`
+- **Backgrounds**: `--bg-cream`, `--bg-warm`, `--bg-card`, `--bg-sidebar` (all light)
+- **Typography**: `--font-display` and `--font-body` (both Inter)
+- **Border radius**: Crisp, not bubbly (`--radius-sm: 4px`, `--radius-md: 6px`, `--radius-lg: 8px`)
+- **Shadows**: Subtle (`--shadow-sm`, `--shadow-md`, `--shadow-lg`, `--shadow-xl`)
 
 ### UI Components (`src/components/ui/`)
 

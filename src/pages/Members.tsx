@@ -197,8 +197,8 @@ function MemberCard({ member, onEdit, onDelete }: MemberCardProps) {
         <div style={{ flex: 1, minWidth: 0 }}>
           <h3
             style={{
-              fontSize: '1.0625rem',
-              fontFamily: 'var(--font-display)',
+              fontSize: '1rem',
+              fontWeight: 600,
               margin: 0,
               marginBottom: '4px',
             }}
