@@ -3,16 +3,18 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Edit2, Trash2, Calendar, User, Wrench, DollarSign, Flag, Tag } from 'lucide-react';
 import { useProject, useUpdateProject, useDeleteProject } from '../hooks/useProjects';
 import { useMembers } from '../hooks/useMembers';
+import { useCurrentUser } from '../context/UserContext';
 import { ProjectForm } from '../components/projects/ProjectForm';
 import { TaskList } from '../components/tasks/TaskList';
 import { PhotoGallery } from '../components/photos/PhotoGallery';
 import { NotesSection } from '../components/notes/NotesSection';
-import { Card, Button, StatusBadge, TypeBadge, PriorityBadge, Badge, Avatar, Modal, PageLoading, RequireAuthButton } from '../components/ui';
+import { Card, Button, StatusBadge, TypeBadge, PriorityBadge, Badge, Avatar, Modal, PageLoading, ReadOnlyBanner } from '../components/ui';
 import type { ProjectInput } from '../types';
 
 export function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { currentUser } = useCurrentUser();
   const { data: project, isLoading, error } = useProject(id!);
   const { data: members } = useMembers();
   const updateProject = useUpdateProject();
@@ -26,6 +28,7 @@ export function ProjectDetailPage() {
 
   const owner = members?.find(m => m.id === project.ownerId);
   const implementer = members?.find(m => m.id === project.implementerId);
+  const canEdit = !!currentUser;
 
   const handleUpdate = (data: ProjectInput) => {
     updateProject.mutate({ id: project.id, data }, {
@@ -50,16 +53,18 @@ export function ProjectDetailPage() {
           gap: '8px',
           color: 'var(--color-stone-500)',
           textDecoration: 'none',
-          fontSize: '0.9375rem',
-          marginBottom: '24px',
+          fontSize: '0.875rem',
+          marginBottom: '16px',
           transition: 'color var(--transition-fast)',
         }}
         onMouseEnter={(e) => e.currentTarget.style.color = 'var(--color-stone-700)'}
         onMouseLeave={(e) => e.currentTarget.style.color = 'var(--color-stone-500)'}
       >
-        <ArrowLeft size={18} />
+        <ArrowLeft size={16} />
         Back to Projects
       </Link>
+
+      <ReadOnlyBanner />
 
       {/* Header */}
       <div
@@ -90,14 +95,16 @@ export function ProjectDetailPage() {
             )}
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <RequireAuthButton variant="secondary" onClick={() => setIsEditing(true)} icon={<Edit2 size={16} />}>
-            Edit
-          </RequireAuthButton>
-          <RequireAuthButton variant="ghost" onClick={() => setShowDeleteConfirm(true)} icon={<Trash2 size={16} />}>
-            Delete
-          </RequireAuthButton>
-        </div>
+        {canEdit && (
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <Button variant="secondary" size="sm" onClick={() => setIsEditing(true)} icon={<Edit2 size={16} />}>
+              Edit
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setShowDeleteConfirm(true)} icon={<Trash2 size={16} />}>
+              Delete
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Edit Modal */}
@@ -310,24 +317,19 @@ export function ProjectDetailPage() {
                 </div>
               )}
 
-              {/* Timestamps */}
-              <div
-                style={{
-                  paddingTop: '16px',
-                  borderTop: '1px solid var(--color-stone-100)',
-                  fontSize: '0.8125rem',
-                  color: 'var(--color-stone-400)',
-                }}
-              >
-                <div style={{ marginBottom: '4px' }}>
-                  Created {new Date(project.createdAt).toLocaleDateString()}
+              {/* Completed date */}
+              {project.completedAt && (
+                <div
+                  style={{
+                    paddingTop: '16px',
+                    borderTop: '1px solid var(--color-stone-100)',
+                    fontSize: '0.8125rem',
+                    color: 'var(--color-stone-400)',
+                  }}
+                >
+                  Completed {new Date(project.completedAt).toLocaleDateString()}
                 </div>
-                {project.completedAt && (
-                  <div>
-                    Completed {new Date(project.completedAt).toLocaleDateString()}
-                  </div>
-                )}
-              </div>
+              )}
             </div>
           </Card>
         </div>

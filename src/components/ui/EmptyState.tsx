@@ -22,8 +22,8 @@ export function EmptyState({ icon, title, description, action }: EmptyStateProps
       {icon && (
         <div
           style={{
-            width: '64px',
-            height: '64px',
+            width: '48px',
+            height: '48px',
             borderRadius: '50%',
             backgroundColor: 'var(--color-stone-100)',
             display: 'flex',

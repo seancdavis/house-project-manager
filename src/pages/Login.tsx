@@ -82,7 +82,7 @@ export function LoginPage() {
         </div>
 
         {/* Member Selection */}
-        <Card>
+        <Card style={{ border: 'none', boxShadow: 'none', backgroundColor: 'transparent' }} padding="none">
           {familyMembers.length === 0 ? (
             <div
               style={{

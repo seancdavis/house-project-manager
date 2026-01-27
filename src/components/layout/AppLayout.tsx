@@ -135,9 +135,7 @@ export function AppLayout() {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '10px',
-                padding: '10px',
-                borderRadius: 'var(--radius-md)',
-                backgroundColor: 'var(--color-stone-50)',
+                padding: '8px 4px',
               }}
             >
               <Avatar

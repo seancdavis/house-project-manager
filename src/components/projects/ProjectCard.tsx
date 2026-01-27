@@ -24,7 +24,7 @@ export function ProjectCard({ project, compact = false }: ProjectCardProps) {
           {/* Content */}
           <div style={{ flex: 1, minWidth: 0 }}>
             {/* Title & Badges */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
               <h3
                 style={{
                   fontSize: compact ? '0.9375rem' : '1rem',
@@ -35,7 +35,10 @@ export function ProjectCard({ project, compact = false }: ProjectCardProps) {
               >
                 {project.title}
               </h3>
-              <StatusBadge status={project.status} />
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                <StatusBadge status={project.status} />
+                <TypeBadge type={project.type} />
+              </div>
             </div>
 
             {/* Description */}
@@ -57,8 +60,6 @@ export function ProjectCard({ project, compact = false }: ProjectCardProps) {
 
             {/* Meta */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-              <TypeBadge type={project.type} />
-
               {project.targetDate && (
                 <div
                   style={{

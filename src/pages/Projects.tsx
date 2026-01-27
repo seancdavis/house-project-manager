@@ -2,12 +2,13 @@ import { useState, useMemo } from 'react';
 import { Plus, FolderKanban, CheckCircle2, Filter, ArrowUpDown, ArrowUp, ArrowDown, X, LayoutGrid, Table, Columns3 } from 'lucide-react';
 import { useProjects, useCreateProject } from '../hooks/useProjects';
 import { useMembers } from '../hooks/useMembers';
+import { useCurrentUser } from '../context/UserContext';
 import { useProjectFilters } from '../hooks/useUrlState';
 import { ProjectCard } from '../components/projects/ProjectCard';
 import { ProjectForm } from '../components/projects/ProjectForm';
 import { ProjectsTable } from '../components/projects/ProjectsTable';
 import { ProjectsKanban } from '../components/projects/ProjectsKanban';
-import { Card, EmptyState, Modal, PageLoading, RequireAuthButton, Button, Select } from '../components/ui';
+import { Card, EmptyState, Modal, PageLoading, Button, Select, ReadOnlyBanner } from '../components/ui';
 import type { ProjectInput, Project } from '../types';
 
 const STATUS_OPTIONS = [
@@ -33,12 +34,14 @@ const SORT_OPTIONS = [
 ];
 
 export function ProjectsPage() {
+  const { currentUser } = useCurrentUser();
   const { data: projects, isLoading, error } = useProjects();
   const { data: members } = useMembers();
   const createProject = useCreateProject();
   const [showForm, setShowForm] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters, resetFilters] = useProjectFilters();
+  const canEdit = !!currentUser;
 
   const handleCreate = (data: ProjectInput) => {
     createProject.mutate(data, {
@@ -97,6 +100,8 @@ export function ProjectsPage() {
 
   return (
     <div className="animate-fade-in">
+      <ReadOnlyBanner />
+
       {/* Header */}
       <div
         style={{
@@ -107,14 +112,16 @@ export function ProjectsPage() {
         }}
       >
         <div>
-          <h1 style={{ fontSize: '2rem', marginBottom: '8px' }}>Projects</h1>
-          <p style={{ color: 'var(--color-stone-500)', fontSize: '1.0625rem' }}>
+          <h1 style={{ fontSize: '1.75rem', marginBottom: '8px' }}>Projects</h1>
+          <p style={{ color: 'var(--color-stone-500)' }}>
             Manage and track all your home improvement projects
           </p>
         </div>
-        <RequireAuthButton onClick={() => setShowForm(true)} icon={<Plus size={18} />}>
-          New Project
-        </RequireAuthButton>
+        {canEdit && (
+          <Button onClick={() => setShowForm(true)} icon={<Plus size={18} />}>
+            New Project
+          </Button>
+        )}
       </div>
 
       {/* Filter Bar */}
@@ -313,21 +320,21 @@ export function ProjectsPage() {
       {filteredProjects.length === 0 && (
         <Card>
           <EmptyState
-            icon={<FolderKanban size={28} />}
+            icon={<FolderKanban size={24} />}
             title={activeFiltersCount > 0 ? "No matching projects" : "No projects yet"}
             description={activeFiltersCount > 0
               ? "Try adjusting your filters to see more results"
               : "Create your first project to start tracking your home improvements"}
             action={
               activeFiltersCount > 0 ? (
-                <Button variant="secondary" onClick={resetFilters}>
+                <Button variant="secondary" size="sm" onClick={resetFilters}>
                   Clear filters
                 </Button>
-              ) : (
-                <RequireAuthButton onClick={() => setShowForm(true)} icon={<Plus size={16} />}>
+              ) : canEdit ? (
+                <Button size="sm" onClick={() => setShowForm(true)} icon={<Plus size={16} />}>
                   Create Project
-                </RequireAuthButton>
-              )
+                </Button>
+              ) : null
             }
           />
         </Card>

@@ -1,44 +1,37 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Plus, Users } from 'lucide-react';
 import { useMembers, useCreateMember, useUpdateMember, useDeleteMember } from '../hooks/useMembers';
+import { useCurrentUser } from '../context/UserContext';
 import { MemberForm } from '../components/members/MemberForm';
-import { Card, Button, Avatar, TypeBadge, EmptyState, Modal, PageLoading, RequireAuthButton } from '../components/ui';
+import { Card, Button, Avatar, TypeBadge, EmptyState, Modal, PageLoading, ReadOnlyBanner } from '../components/ui';
 import type { Member, MemberInput } from '../types';
 
 export function MembersPage() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const { id: editingMemberId } = useParams<{ id: string }>();
+  const { currentUser } = useCurrentUser();
   const { data: members, isLoading, error } = useMembers();
   const createMember = useCreateMember();
   const updateMember = useUpdateMember();
   const deleteMember = useDeleteMember();
 
-  const [showForm, setShowForm] = useState(false);
+  const [showNewForm, setShowNewForm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // Get editing member from URL
-  const editingMemberId = searchParams.get('edit');
+  const canEdit = !!currentUser;
   const editingMember = editingMemberId ? members?.find(m => m.id === editingMemberId) : null;
 
-  // Show new member modal from URL
-  const isNewMember = searchParams.get('new') === 'true';
-
-  useEffect(() => {
-    setShowForm(isNewMember);
-  }, [isNewMember]);
-
   const openNewMemberModal = () => {
-    navigate('/members?new=true');
+    setShowNewForm(true);
   };
 
   const closeNewMemberModal = () => {
-    setShowForm(false);
-    navigate('/members');
+    setShowNewForm(false);
   };
 
   const openEditModal = (member: Member) => {
-    navigate(`/members?edit=${member.id}`);
+    navigate(`/members/${member.id}`);
   };
 
   const closeEditModal = () => {
@@ -74,6 +67,8 @@ export function MembersPage() {
 
   return (
     <div className="animate-fade-in">
+      <ReadOnlyBanner />
+
       {/* Header */}
       <div
         style={{
@@ -89,18 +84,20 @@ export function MembersPage() {
             Manage family members and contractors
           </p>
         </div>
-        <RequireAuthButton onClick={openNewMemberModal} icon={<Plus size={18} />}>
-          Add Member
-        </RequireAuthButton>
+        {canEdit && (
+          <Button onClick={openNewMemberModal} icon={<Plus size={18} />}>
+            Add Member
+          </Button>
+        )}
       </div>
 
       {/* Create Modal */}
-      <Modal isOpen={showForm} onClose={closeNewMemberModal} title="New Member" size="md">
+      <Modal isOpen={showNewForm} onClose={closeNewMemberModal} title="New Member" size="md">
         <MemberForm onSubmit={handleCreate} onCancel={closeNewMemberModal} />
       </Modal>
 
       {/* Edit Modal */}
-      <Modal isOpen={!!editingMember} onClose={closeEditModal} title="Edit Member" size="md">
+      <Modal isOpen={!!editingMember && canEdit} onClose={closeEditModal} title="Edit Member" size="md">
         {editingMember && (
           <>
             <MemberForm
@@ -148,14 +145,14 @@ export function MembersPage() {
       {members?.length === 0 && (
         <Card>
           <EmptyState
-            icon={<Users size={28} />}
+            icon={<Users size={24} />}
             title="No members yet"
             description="Add family members and contractors to assign them to projects"
-            action={
-              <RequireAuthButton onClick={openNewMemberModal} icon={<Plus size={16} />}>
+            action={canEdit ? (
+              <Button size="sm" onClick={openNewMemberModal} icon={<Plus size={16} />}>
                 Add Member
-              </RequireAuthButton>
-            }
+              </Button>
+            ) : null}
           />
         </Card>
       )}
@@ -187,7 +184,7 @@ export function MembersPage() {
               <MemberCard
                 key={member.id}
                 member={member}
-                onClick={() => openEditModal(member)}
+                onClick={canEdit ? () => openEditModal(member) : undefined}
               />
             ))}
           </div>
@@ -221,7 +218,7 @@ export function MembersPage() {
               <MemberCard
                 key={member.id}
                 member={member}
-                onClick={() => openEditModal(member)}
+                onClick={canEdit ? () => openEditModal(member) : undefined}
               />
             ))}
           </div>
@@ -233,42 +230,54 @@ export function MembersPage() {
 
 interface MemberCardProps {
   member: Member;
-  onClick: () => void;
+  onClick?: () => void;
 }
 
 function MemberCard({ member, onClick }: MemberCardProps) {
+  const content = (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <Avatar initials={member.initials} color={member.color} size="md" />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <h3
+          style={{
+            fontSize: '0.9375rem',
+            fontWeight: 500,
+            margin: 0,
+            marginBottom: '4px',
+            color: 'var(--color-stone-900)',
+          }}
+        >
+          {member.name}
+        </h3>
+        <TypeBadge type={member.type} />
+      </div>
+    </div>
+  );
+
+  if (onClick) {
+    return (
+      <Card padding="sm">
+        <button
+          onClick={onClick}
+          style={{
+            display: 'block',
+            width: '100%',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            textAlign: 'left',
+            padding: '4px',
+          }}
+        >
+          {content}
+        </button>
+      </Card>
+    );
+  }
+
   return (
     <Card padding="sm">
-      <button
-        onClick={onClick}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-          width: '100%',
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-          textAlign: 'left',
-          padding: '4px',
-        }}
-      >
-        <Avatar initials={member.initials} color={member.color} size="md" />
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <h3
-            style={{
-              fontSize: '0.9375rem',
-              fontWeight: 500,
-              margin: 0,
-              marginBottom: '4px',
-              color: 'var(--color-stone-900)',
-            }}
-          >
-            {member.name}
-          </h3>
-          <TypeBadge type={member.type} />
-        </div>
-      </button>
+      <div style={{ padding: '4px' }}>{content}</div>
     </Card>
   );
 }
