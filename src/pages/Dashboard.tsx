@@ -144,14 +144,7 @@ export function DashboardPage() {
       )}
 
       {/* Stats */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
-          gap: '20px',
-          marginBottom: '40px',
-        }}
-      >
+      <div className="stats-grid" style={{ marginBottom: '32px' }}>
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
@@ -195,13 +188,7 @@ export function DashboardPage() {
       </div>
 
       {/* Content Grid */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: currentUser && myProjects.length > 0 ? '1fr 1fr' : '1fr',
-          gap: '24px',
-        }}
-      >
+      <div className={`content-grid ${currentUser && myProjects.length > 0 ? 'two-col' : ''}`}>
         {/* My Projects */}
         {currentUser && myProjects.length > 0 && (
           <div>

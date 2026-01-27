@@ -241,3 +241,35 @@ h1, h2, h3, h4, h5, h6 {
 .new-tag-input button {
   flex-shrink: 0;
 }
+
+/* Responsive Grid Utilities */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.content-grid {
+  display: grid;
+  gap: 24px;
+}
+
+.content-grid.two-col {
+  grid-template-columns: 1fr 1fr;
+}
+
+@media (max-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .content-grid.two-col {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}

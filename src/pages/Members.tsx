@@ -1,37 +1,68 @@
-import { useState } from 'react';
-import { Plus, Users, Edit2, Trash2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Plus, Users } from 'lucide-react';
 import { useMembers, useCreateMember, useUpdateMember, useDeleteMember } from '../hooks/useMembers';
 import { MemberForm } from '../components/members/MemberForm';
 import { Card, Button, Avatar, TypeBadge, EmptyState, Modal, PageLoading, RequireAuthButton } from '../components/ui';
 import type { Member, MemberInput } from '../types';
 
 export function MembersPage() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { data: members, isLoading, error } = useMembers();
   const createMember = useCreateMember();
   const updateMember = useUpdateMember();
   const deleteMember = useDeleteMember();
 
   const [showForm, setShowForm] = useState(false);
-  const [editingMember, setEditingMember] = useState<Member | null>(null);
-  const [deletingMember, setDeletingMember] = useState<Member | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // Get editing member from URL
+  const editingMemberId = searchParams.get('edit');
+  const editingMember = editingMemberId ? members?.find(m => m.id === editingMemberId) : null;
+
+  // Show new member modal from URL
+  const isNewMember = searchParams.get('new') === 'true';
+
+  useEffect(() => {
+    setShowForm(isNewMember);
+  }, [isNewMember]);
+
+  const openNewMemberModal = () => {
+    navigate('/members?new=true');
+  };
+
+  const closeNewMemberModal = () => {
+    setShowForm(false);
+    navigate('/members');
+  };
+
+  const openEditModal = (member: Member) => {
+    navigate(`/members?edit=${member.id}`);
+  };
+
+  const closeEditModal = () => {
+    setShowDeleteConfirm(false);
+    navigate('/members');
+  };
 
   const handleCreate = (data: MemberInput) => {
     createMember.mutate(data, {
-      onSuccess: () => setShowForm(false),
+      onSuccess: () => closeNewMemberModal(),
     });
   };
 
   const handleUpdate = (data: MemberInput) => {
     if (!editingMember) return;
     updateMember.mutate({ id: editingMember.id, data }, {
-      onSuccess: () => setEditingMember(null),
+      onSuccess: () => closeEditModal(),
     });
   };
 
   const handleDelete = () => {
-    if (!deletingMember) return;
-    deleteMember.mutate(deletingMember.id, {
-      onSuccess: () => setDeletingMember(null),
+    if (!editingMember) return;
+    deleteMember.mutate(editingMember.id, {
+      onSuccess: () => closeEditModal(),
     });
   };
 
@@ -53,41 +84,64 @@ export function MembersPage() {
         }}
       >
         <div>
-          <h1 style={{ fontSize: '2rem', marginBottom: '8px' }}>Members</h1>
-          <p style={{ color: 'var(--color-stone-500)', fontSize: '1.0625rem' }}>
+          <h1 style={{ fontSize: '1.75rem', marginBottom: '8px' }}>Members</h1>
+          <p style={{ color: 'var(--color-stone-500)' }}>
             Manage family members and contractors
           </p>
         </div>
-        <RequireAuthButton onClick={() => setShowForm(true)} icon={<Plus size={18} />}>
+        <RequireAuthButton onClick={openNewMemberModal} icon={<Plus size={18} />}>
           Add Member
         </RequireAuthButton>
       </div>
 
       {/* Create Modal */}
-      <Modal isOpen={showForm} onClose={() => setShowForm(false)} title="New Member" size="md">
-        <MemberForm onSubmit={handleCreate} onCancel={() => setShowForm(false)} />
+      <Modal isOpen={showForm} onClose={closeNewMemberModal} title="New Member" size="md">
+        <MemberForm onSubmit={handleCreate} onCancel={closeNewMemberModal} />
       </Modal>
 
       {/* Edit Modal */}
-      <Modal isOpen={!!editingMember} onClose={() => setEditingMember(null)} title="Edit Member" size="md">
+      <Modal isOpen={!!editingMember} onClose={closeEditModal} title="Edit Member" size="md">
         {editingMember && (
-          <MemberForm member={editingMember} onSubmit={handleUpdate} onCancel={() => setEditingMember(null)} />
+          <>
+            <MemberForm
+              member={editingMember}
+              onSubmit={handleUpdate}
+              onCancel={closeEditModal}
+            />
+            <div
+              style={{
+                marginTop: '24px',
+                paddingTop: '24px',
+                borderTop: '1px solid var(--color-stone-200)',
+              }}
+            >
+              {showDeleteConfirm ? (
+                <div>
+                  <p style={{ marginBottom: '16px', color: 'var(--color-stone-600)', fontSize: '0.875rem' }}>
+                    Are you sure you want to delete <strong>{editingMember.name}</strong>? This action cannot be undone.
+                  </p>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <Button variant="danger" size="sm" onClick={handleDelete}>
+                      Yes, Delete
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => setShowDeleteConfirm(false)}>
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  style={{ color: 'var(--color-warning)' }}
+                >
+                  Delete Member
+                </Button>
+              )}
+            </div>
+          </>
         )}
-      </Modal>
-
-      {/* Delete Confirmation Modal */}
-      <Modal isOpen={!!deletingMember} onClose={() => setDeletingMember(null)} title="Delete Member" size="sm">
-        <p style={{ marginBottom: '24px', color: 'var(--color-stone-600)' }}>
-          Are you sure you want to delete <strong>{deletingMember?.name}</strong>? This action cannot be undone.
-        </p>
-        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-          <Button variant="secondary" onClick={() => setDeletingMember(null)}>
-            Cancel
-          </Button>
-          <Button variant="danger" onClick={handleDelete}>
-            Delete Member
-          </Button>
-        </div>
       </Modal>
 
       {/* Empty State */}
@@ -98,7 +152,7 @@ export function MembersPage() {
             title="No members yet"
             description="Add family members and contractors to assign them to projects"
             action={
-              <RequireAuthButton onClick={() => setShowForm(true)} icon={<Plus size={16} />}>
+              <RequireAuthButton onClick={openNewMemberModal} icon={<Plus size={16} />}>
                 Add Member
               </RequireAuthButton>
             }
@@ -108,14 +162,13 @@ export function MembersPage() {
 
       {/* Family Members */}
       {familyMembers.length > 0 && (
-        <div style={{ marginBottom: '40px' }}>
-          <h2 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>
+        <div style={{ marginBottom: '32px' }}>
+          <h2 style={{ fontSize: '1.125rem', marginBottom: '12px', fontWeight: 600 }}>
             Family Members
             <span
               style={{
-                marginLeft: '10px',
+                marginLeft: '8px',
                 fontSize: '0.875rem',
-                fontFamily: 'var(--font-body)',
                 color: 'var(--color-stone-400)',
                 fontWeight: 400,
               }}
@@ -126,18 +179,16 @@ export function MembersPage() {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-              gap: '16px',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+              gap: '12px',
             }}
           >
-            {familyMembers.map((member, index) => (
-              <div key={member.id} style={{ animationDelay: `${index * 50}ms` }} className="animate-slide-in-up">
-                <MemberCard
-                  member={member}
-                  onEdit={() => setEditingMember(member)}
-                  onDelete={() => setDeletingMember(member)}
-                />
-              </div>
+            {familyMembers.map((member) => (
+              <MemberCard
+                key={member.id}
+                member={member}
+                onClick={() => openEditModal(member)}
+              />
             ))}
           </div>
         </div>
@@ -146,13 +197,12 @@ export function MembersPage() {
       {/* Contractors */}
       {contractors.length > 0 && (
         <div>
-          <h2 style={{ fontSize: '1.25rem', marginBottom: '16px' }}>
+          <h2 style={{ fontSize: '1.125rem', marginBottom: '12px', fontWeight: 600 }}>
             Contractors
             <span
               style={{
-                marginLeft: '10px',
+                marginLeft: '8px',
                 fontSize: '0.875rem',
-                fontFamily: 'var(--font-body)',
                 color: 'var(--color-stone-400)',
                 fontWeight: 400,
               }}
@@ -163,18 +213,16 @@ export function MembersPage() {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-              gap: '16px',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+              gap: '12px',
             }}
           >
-            {contractors.map((member, index) => (
-              <div key={member.id} style={{ animationDelay: `${index * 50}ms` }} className="animate-slide-in-up">
-                <MemberCard
-                  member={member}
-                  onEdit={() => setEditingMember(member)}
-                  onDelete={() => setDeletingMember(member)}
-                />
-              </div>
+            {contractors.map((member) => (
+              <MemberCard
+                key={member.id}
+                member={member}
+                onClick={() => openEditModal(member)}
+              />
             ))}
           </div>
         </div>
@@ -185,37 +233,42 @@ export function MembersPage() {
 
 interface MemberCardProps {
   member: Member;
-  onEdit: () => void;
-  onDelete: () => void;
+  onClick: () => void;
 }
 
-function MemberCard({ member, onEdit, onDelete }: MemberCardProps) {
+function MemberCard({ member, onClick }: MemberCardProps) {
   return (
-    <Card hover>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-        <Avatar initials={member.initials} color={member.color} size="lg" />
+    <Card padding="sm">
+      <button
+        onClick={onClick}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          width: '100%',
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          textAlign: 'left',
+          padding: '4px',
+        }}
+      >
+        <Avatar initials={member.initials} color={member.color} size="md" />
         <div style={{ flex: 1, minWidth: 0 }}>
           <h3
             style={{
-              fontSize: '1rem',
-              fontWeight: 600,
+              fontSize: '0.9375rem',
+              fontWeight: 500,
               margin: 0,
               marginBottom: '4px',
+              color: 'var(--color-stone-900)',
             }}
           >
             {member.name}
           </h3>
           <TypeBadge type={member.type} />
         </div>
-        <div style={{ display: 'flex', gap: '4px' }}>
-          <Button variant="ghost" size="sm" onClick={onEdit} style={{ padding: '8px' }}>
-            <Edit2 size={16} />
-          </Button>
-          <Button variant="ghost" size="sm" onClick={onDelete} style={{ padding: '8px' }}>
-            <Trash2 size={16} />
-          </Button>
-        </div>
-      </div>
+      </button>
     </Card>
   );
 }

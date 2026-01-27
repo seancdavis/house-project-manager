@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Plus, FolderKanban, CheckCircle2, Filter, ArrowUpDown, X, LayoutGrid, Table, Columns3 } from 'lucide-react';
+import { Plus, FolderKanban, CheckCircle2, Filter, ArrowUpDown, ArrowUp, ArrowDown, X, LayoutGrid, Table, Columns3 } from 'lucide-react';
 import { useProjects, useCreateProject } from '../hooks/useProjects';
 import { useMembers } from '../hooks/useMembers';
 import { useProjectFilters } from '../hooks/useUrlState';
@@ -159,9 +159,10 @@ export function ProjectsPage() {
               variant="ghost"
               size="sm"
               onClick={() => setFilters({ order: filters.order === 'asc' ? 'desc' : 'asc' })}
-              style={{ padding: '6px 10px' }}
+              style={{ padding: '6px 8px' }}
+              title={filters.order === 'asc' ? 'Ascending' : 'Descending'}
             >
-              {filters.order === 'asc' ? 'A-Z' : 'Z-A'}
+              {filters.order === 'asc' ? <ArrowUp size={16} /> : <ArrowDown size={16} />}
             </Button>
           </div>
 
