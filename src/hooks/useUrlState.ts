@@ -63,7 +63,7 @@ export const PROJECT_FILTER_DEFAULTS: ProjectFilters = {
   owner: undefined,
   sort: 'createdAt',
   order: 'desc',
-  view: 'list',
+  view: 'cards',
 };
 
 export function useProjectFilters() {
