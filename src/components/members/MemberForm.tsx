@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useRef } from 'react';
 import { useForm } from 'react-hook-form';
-import { Shuffle, Palette } from 'lucide-react';
+import { Shuffle } from 'lucide-react';
 import { Input, Select, InputWrapper, Button, Avatar } from '../ui';
 import type { Member, MemberInput } from '../../types';
 
@@ -23,8 +23,7 @@ interface MemberFormProps {
 }
 
 export function MemberForm({ member, onSubmit, onCancel }: MemberFormProps) {
-  const [showCustomColor, setShowCustomColor] = useState(false);
-  const [customColorInput, setCustomColorInput] = useState(member?.color || '#3B82F6');
+  const colorInputRef = useRef<HTMLInputElement>(null);
 
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<MemberInput>({
     defaultValues: member ? {
@@ -57,13 +56,14 @@ export function MemberForm({ member, onSubmit, onCancel }: MemberFormProps) {
 
   const handleRandomColor = () => {
     setValue('color', getRandomColor());
-    setShowCustomColor(false);
   };
 
-  const handleApplyCustomColor = () => {
-    if (customColorInput.match(/^#[0-9A-Fa-f]{6}$/)) {
-      setValue('color', customColorInput);
-    }
+  const handleColorBoxClick = () => {
+    colorInputRef.current?.click();
+  };
+
+  const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setValue('color', e.target.value);
   };
 
   return (
@@ -125,87 +125,44 @@ export function MemberForm({ member, onSubmit, onCancel }: MemberFormProps) {
       </div>
 
       <InputWrapper label="Color">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {/* Color buttons */}
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={handleRandomColor}
-              icon={<Shuffle size={16} />}
-            >
-              Random
-            </Button>
-            <Button
-              type="button"
-              variant={showCustomColor ? 'primary' : 'secondary'}
-              size="sm"
-              onClick={() => setShowCustomColor(!showCustomColor)}
-              icon={<Palette size={16} />}
-            >
-              Custom
-            </Button>
-            <div
-              style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: 'var(--radius-md)',
-                backgroundColor: selectedColor,
-                border: '2px solid var(--color-stone-200)',
-                marginLeft: '8px',
-              }}
-            />
-          </div>
-
-          {/* Custom color picker */}
-          {showCustomColor && (
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '12px',
-                backgroundColor: 'var(--color-stone-50)',
-                borderRadius: 'var(--radius-md)',
-              }}
-            >
-              <input
-                type="color"
-                value={customColorInput}
-                onChange={(e) => setCustomColorInput(e.target.value)}
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  padding: 0,
-                  border: 'none',
-                  borderRadius: 'var(--radius-md)',
-                  cursor: 'pointer',
-                }}
-              />
-              <div style={{ flex: 1 }}>
-                <Input
-                  type="text"
-                  value={customColorInput}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    if (val.match(/^#[0-9A-Fa-f]{0,6}$/)) {
-                      setCustomColorInput(val);
-                    }
-                  }}
-                  placeholder="#000000"
-                  style={{ fontFamily: 'monospace', fontSize: '0.875rem' }}
-                />
-              </div>
-              <Button
-                type="button"
-                size="sm"
-                onClick={handleApplyCustomColor}
-              >
-                Apply
-              </Button>
-            </div>
-          )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* Color box - click to open picker */}
+          <button
+            type="button"
+            onClick={handleColorBoxClick}
+            style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: 'var(--radius-md)',
+              backgroundColor: selectedColor,
+              border: '2px solid var(--color-stone-200)',
+              cursor: 'pointer',
+              padding: 0,
+            }}
+            title="Click to choose color"
+          />
+          {/* Hidden color input */}
+          <input
+            ref={colorInputRef}
+            type="color"
+            value={selectedColor}
+            onChange={handleColorChange}
+            style={{
+              position: 'absolute',
+              opacity: 0,
+              pointerEvents: 'none',
+            }}
+          />
+          {/* Random button */}
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={handleRandomColor}
+            icon={<Shuffle size={16} />}
+          >
+            Random
+          </Button>
         </div>
         <input type="hidden" {...register('color', { required: true })} />
       </InputWrapper>
