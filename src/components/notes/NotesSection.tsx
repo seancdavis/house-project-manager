@@ -78,41 +78,38 @@ export function NotesSection({ projectId }: NotesSectionProps) {
 
   return (
     <div>
-      {/* Add Note Form */}
-      <form onSubmit={handleSubmit} style={{ marginBottom: '24px' }}>
-        <div
-          style={{
-            display: 'flex',
-            gap: '12px',
-            alignItems: 'flex-start',
-          }}
-        >
-          {currentUser && (
+      {/* Add Note Form - only show when signed in */}
+      {currentUser && (
+        <form onSubmit={handleSubmit} style={{ marginBottom: '24px' }}>
+          <div
+            style={{
+              display: 'flex',
+              gap: '12px',
+              alignItems: 'flex-start',
+            }}
+          >
             <Avatar
               initials={currentUser.initials}
               color={currentUser.color}
               size="sm"
             />
-          )}
-          <div style={{ flex: 1 }}>
-            <textarea
-              value={newNote}
-              onChange={(e) => setNewNote(e.target.value)}
-              placeholder={currentUser ? "Add a note..." : "Sign in to add notes"}
-              disabled={!currentUser}
-              style={{
-                width: '100%',
-                padding: '12px',
-                border: '1px solid var(--color-stone-200)',
-                borderRadius: 'var(--radius-md)',
-                fontFamily: 'var(--font-body)',
-                fontSize: '0.9375rem',
-                resize: 'vertical',
-                minHeight: '80px',
-                backgroundColor: currentUser ? 'white' : 'var(--color-stone-50)',
-              }}
-            />
-            {currentUser && (
+            <div style={{ flex: 1 }}>
+              <textarea
+                value={newNote}
+                onChange={(e) => setNewNote(e.target.value)}
+                placeholder="Add a note..."
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: '1px solid var(--color-stone-200)',
+                  borderRadius: 'var(--radius-md)',
+                  fontFamily: 'var(--font-body)',
+                  fontSize: '0.9375rem',
+                  resize: 'vertical',
+                  minHeight: '80px',
+                  backgroundColor: 'white',
+                }}
+              />
               <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
                 <Button
                   type="submit"
@@ -123,10 +120,10 @@ export function NotesSection({ projectId }: NotesSectionProps) {
                   Add Note
                 </Button>
               </div>
-            )}
+            </div>
           </div>
-        </div>
-      </form>
+        </form>
+      )}
 
       {/* Notes List */}
       {notes && notes.length > 0 ? (
@@ -266,7 +263,7 @@ export function NotesSection({ projectId }: NotesSectionProps) {
         </div>
       ) : (
         <EmptyState
-          icon={<MessageSquare size={48} />}
+          icon={<MessageSquare size={32} />}
           title="No notes yet"
           description="Add notes to track discussions and decisions about this project"
         />

@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { Upload, Trash2, ImageIcon } from 'lucide-react';
 import { usePhotos, useUploadPhoto, useDeletePhoto } from '../../hooks/usePhotos';
 import { useCurrentUser } from '../../context/UserContext';
-import { Modal, EmptyState, Loading, RequireAuthButton } from '../ui';
+import { Modal, Button, EmptyState, Loading } from '../ui';
 import type { Photo } from '../../types';
 
 interface PhotoGalleryProps {
@@ -52,32 +52,34 @@ export function PhotoGallery({ projectId }: PhotoGalleryProps) {
 
   return (
     <div>
-      {/* Upload Section */}
-      <div
-        style={{
-          display: 'flex',
-          gap: '12px',
-          marginBottom: '20px',
-          alignItems: 'center',
-        }}
-      >
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/jpeg,image/png,image/gif,image/webp"
-          onChange={handleFileSelect}
-          style={{ display: 'none' }}
-          id="photo-upload"
-        />
-        <RequireAuthButton
-          variant="secondary"
-          icon={<Upload size={16} />}
-          onClick={() => fileInputRef.current?.click()}
-          disabled={isUploading}
+      {/* Upload Section - only show when signed in */}
+      {currentUser && (
+        <div
+          style={{
+            display: 'flex',
+            gap: '12px',
+            marginBottom: '20px',
+            alignItems: 'center',
+          }}
         >
-          {isUploading ? 'Uploading...' : 'Upload Photo'}
-        </RequireAuthButton>
-      </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/gif,image/webp"
+            onChange={handleFileSelect}
+            style={{ display: 'none' }}
+            id="photo-upload"
+          />
+          <Button
+            variant="secondary"
+            icon={<Upload size={16} />}
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+          >
+            {isUploading ? 'Uploading...' : 'Upload Photo'}
+          </Button>
+        </div>
+      )}
 
       {/* Photo Grid */}
       {photos && photos.length > 0 ? (
@@ -118,7 +120,7 @@ export function PhotoGallery({ projectId }: PhotoGalleryProps) {
         </div>
       ) : (
         <EmptyState
-          icon={<ImageIcon size={48} />}
+          icon={<ImageIcon size={32} />}
           title="No photos yet"
           description="Upload photos to document this project's progress"
         />
@@ -164,13 +166,15 @@ export function PhotoGallery({ projectId }: PhotoGalleryProps) {
                 <span style={{ margin: '0 8px' }}>·</span>
                 {(selectedPhoto.size / 1024).toFixed(1)} KB
               </div>
-              <RequireAuthButton
-                variant="ghost"
-                icon={<Trash2 size={16} />}
-                onClick={() => handleDelete(selectedPhoto)}
-              >
-                Delete
-              </RequireAuthButton>
+{currentUser && (
+                <Button
+                  variant="ghost"
+                  icon={<Trash2 size={16} />}
+                  onClick={() => handleDelete(selectedPhoto)}
+                >
+                  Delete
+                </Button>
+              )}
             </div>
           </div>
         )}

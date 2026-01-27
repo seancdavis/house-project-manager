@@ -1,11 +1,12 @@
 import { useMembers } from '../../hooks/useMembers';
 import { useCurrentUser } from '../../context/UserContext';
+import { Loading } from '../ui';
 
 export function UserPicker() {
   const { data: members, isLoading } = useMembers();
   const { currentUser, setCurrentUser } = useCurrentUser();
 
-  if (isLoading) return <span>Loading...</span>;
+  if (isLoading) return <Loading size="sm" />;
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

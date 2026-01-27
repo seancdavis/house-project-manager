@@ -56,7 +56,7 @@ export function PageLoading() {
         minHeight: '400px',
       }}
     >
-      <Loading size="lg" text="Loading..." />
+      <Loading size="lg" />
     </div>
   );
 }

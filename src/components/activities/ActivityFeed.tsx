@@ -95,7 +95,7 @@ function formatRelativeTime(dateString: string): string {
 export function ActivityFeed({ projectId, limit = 10 }: ActivityFeedProps) {
   const { data: activities, isLoading } = useActivities({ projectId, limit });
 
-  if (isLoading) return <Loading size="sm" text="Loading activity..." />;
+  if (isLoading) return <Loading size="sm" />;
 
   if (!activities || activities.length === 0) {
     return (

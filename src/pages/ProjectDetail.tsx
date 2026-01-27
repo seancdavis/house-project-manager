@@ -79,9 +79,9 @@ export function ProjectDetailPage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
             <h1 style={{ fontSize: '1.75rem', margin: 0 }}>{project.title}</h1>
             <StatusBadge status={project.status} />
+            <TypeBadge type={project.type} />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-            <TypeBadge type={project.type} />
             <PriorityBadge priority={project.priority} />
             {project.tags && project.tags.length > 0 && (
               <>

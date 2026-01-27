@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Plus, Check, Trash2, ListTodo, LogIn, ChevronUp, ChevronDown, Edit2 } from 'lucide-react';
+import { Plus, Check, Trash2, ListTodo, ChevronUp, ChevronDown, Edit2 } from 'lucide-react';
 import { useTasks, useCreateTask, useUpdateTask, useDeleteTask, useReorderTasks } from '../../hooks/useTasks';
 import { useCurrentUser } from '../../context/UserContext';
 import { Input, Button, Loading, EmptyState } from '../ui';
@@ -63,37 +62,13 @@ export function TaskList({ projectId }: TaskListProps) {
     reorderTasks.mutate(newOrder.map(t => t.id));
   };
 
-  if (isLoading) return <Loading size="sm" text="Loading tasks..." />;
+  if (isLoading) return <Loading size="sm" />;
 
   const todoTasks = tasks?.filter(t => t.status !== 'done') || [];
   const doneTasks = tasks?.filter(t => t.status === 'done') || [];
 
   return (
     <div>
-      {/* Auth notice */}
-      {!currentUser && (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            padding: '12px 16px',
-            marginBottom: '16px',
-            backgroundColor: 'var(--color-primary-50)',
-            borderRadius: 'var(--radius-md)',
-            border: '1px solid var(--color-primary-200)',
-          }}
-        >
-          <LogIn size={18} color="var(--color-primary-600)" />
-          <span style={{ flex: 1, fontSize: '0.875rem', color: 'var(--color-stone-600)' }}>
-            Sign in to add or manage tasks
-          </span>
-          <Link to="/login">
-            <Button size="sm" variant="primary">Sign In</Button>
-          </Link>
-        </div>
-      )}
-
       {/* Add Task Form */}
       {currentUser && (
         <form onSubmit={handleAddTask} style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
