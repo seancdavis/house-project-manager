@@ -8,15 +8,32 @@ House Project Manager is a React application for tracking home improvement proje
 
 ## Design System
 
-The application uses a clean, light, and data-focused design aesthetic:
+The application uses a clean, light, and data-focused design aesthetic.
+
+### Design Philosophy
+
+**DO:**
+- Keep everything light and bright - white backgrounds, light gray accents
+- Use clean sans-serif typography (Inter) throughout - no serif fonts
+- Keep border-radius crisp and subtle (4-8px max) - avoid bubbly/rounded looks
+- Present data in a refined, easy-to-consume way - this is a PM app about data
+- Use compact, efficient spacing - don't waste vertical space
+- Use subtle shadows and borders for depth
+
+**DON'T:**
+- Use dark sidebars or dark themes
+- Use decorative serif fonts
+- Make buttons or cards too rounded/bubbly
+- Add unnecessary visual flourishes
+- Use heavy shadows or borders
 
 ### CSS Variables (defined in `src/index.css`)
 
 - **Primary colors**: `--color-primary-*` (clean blue palette)
 - **Neutral colors**: `--color-stone-*` (cool gray palette)
 - **Accent colors**: `--color-success`, `--color-warning`, `--color-info`, `--color-amber`
-- **Backgrounds**: `--bg-cream`, `--bg-warm`, `--bg-card`, `--bg-sidebar` (all light)
-- **Typography**: `--font-display` and `--font-body` (both Inter)
+- **Backgrounds**: `--bg-cream`, `--bg-warm`, `--bg-card`, `--bg-sidebar` (all light/white)
+- **Typography**: `--font-display` and `--font-body` (both Inter, use fontWeight 600 for headings)
 - **Border radius**: Crisp, not bubbly (`--radius-sm: 4px`, `--radius-md: 6px`, `--radius-lg: 8px`)
 - **Shadows**: Subtle (`--shadow-sm`, `--shadow-md`, `--shadow-lg`, `--shadow-xl`)
 
