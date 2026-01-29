@@ -20,8 +20,8 @@ function fileToBase64(file: File): Promise<string> {
   });
 }
 
-// Max file size before base64 encoding (~4.5MB to stay under 6MB limit after encoding)
-const MAX_FILE_SIZE = 4.5 * 1024 * 1024;
+// Max file size before base64 encoding (~4MB to stay safely under 6MB limit after encoding + JSON overhead)
+const MAX_FILE_SIZE = 4 * 1024 * 1024;
 
 export async function uploadPhoto(
   projectId: string,
@@ -52,8 +52,19 @@ export async function uploadPhoto(
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to upload photo');
+    // Handle both JSON and text error responses
+    const contentType = response.headers.get('content-type');
+    if (contentType?.includes('application/json')) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to upload photo');
+    } else {
+      const text = await response.text();
+      // Netlify returns "Internal Error. ID: ..." for payload too large
+      if (text.includes('Internal Error') || response.status === 500) {
+        throw new Error('Upload failed. The file may be too large for the server.');
+      }
+      throw new Error(text || 'Failed to upload photo');
+    }
   }
 
   return response.json();
