@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as api from '../api/members';
+import { useToast } from '../context/ToastContext';
 import type { MemberInput } from '../types';
 
 export function useMembers() {
@@ -19,31 +20,46 @@ export function useMember(id: string) {
 
 export function useCreateMember() {
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
   return useMutation({
     mutationFn: (data: MemberInput) => api.createMember(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['members'] });
+      showToast('Member created');
+    },
+    onError: (error: Error) => {
+      showToast(error.message || 'Failed to create member', 'error');
     },
   });
 }
 
 export function useUpdateMember() {
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: MemberInput }) =>
       api.updateMember(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['members'] });
+      showToast('Member updated');
+    },
+    onError: (error: Error) => {
+      showToast(error.message || 'Failed to update member', 'error');
     },
   });
 }
 
 export function useDeleteMember() {
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
   return useMutation({
     mutationFn: (id: string) => api.deleteMember(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['members'] });
+      showToast('Member deleted');
+    },
+    onError: (error: Error) => {
+      showToast(error.message || 'Failed to delete member', 'error');
     },
   });
 }

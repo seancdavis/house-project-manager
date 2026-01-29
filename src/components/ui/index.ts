@@ -9,3 +9,4 @@ export { Loading, PageLoading } from './Loading';
 export { AuthGuard, RequireAuthButton } from './AuthGuard';
 export { ReadOnlyBanner } from './ReadOnlyBanner';
 export { InlineEdit } from './InlineEdit';
+export { ToastContainer } from './Toast';

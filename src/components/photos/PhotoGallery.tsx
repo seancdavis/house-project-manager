@@ -19,10 +19,7 @@ export function PhotoGallery({ projectId }: PhotoGalleryProps) {
   const deletePhoto = useDeletePhoto();
   const { currentUser } = useCurrentUser();
 
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadingFileName, setUploadingFileName] = useState<string | null>(null);
   const [uploadCaption, setUploadCaption] = useState('');
-  const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Get selected photo from URL
@@ -40,25 +37,15 @@ export function PhotoGallery({ projectId }: PhotoGalleryProps) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setIsUploading(true);
-    setUploadingFileName(file.name);
-    setUploadError(null);
-    try {
-      await uploadPhoto.mutateAsync({
-        projectId,
-        file,
-        caption: uploadCaption || undefined,
-        uploadedById: currentUser?.id,
-      });
-      setUploadCaption('');
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    } catch (error) {
-      setUploadError(error instanceof Error ? error.message : 'Upload failed');
-    } finally {
-      setIsUploading(false);
-      setUploadingFileName(null);
+    await uploadPhoto.mutateAsync({
+      projectId,
+      file,
+      caption: uploadCaption || undefined,
+      uploadedById: currentUser?.id,
+    });
+    setUploadCaption('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -95,20 +82,10 @@ export function PhotoGallery({ projectId }: PhotoGalleryProps) {
             variant="secondary"
             icon={<Upload size={16} />}
             onClick={() => fileInputRef.current?.click()}
-            disabled={isUploading}
+            disabled={uploadPhoto.isPending}
           >
-            {isUploading ? 'Uploading...' : 'Upload Photo'}
+            {uploadPhoto.isPending ? 'Uploading...' : 'Upload Photo'}
           </Button>
-          {isUploading && uploadingFileName && (
-            <div style={{ color: 'var(--color-stone-600)', fontSize: '0.875rem' }}>
-              Uploading {uploadingFileName}...
-            </div>
-          )}
-          {uploadError && (
-            <div style={{ color: 'var(--color-warning)', fontSize: '0.875rem' }}>
-              {uploadError}
-            </div>
-          )}
         </div>
       )}
 
