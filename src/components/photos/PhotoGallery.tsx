@@ -21,6 +21,7 @@ export function PhotoGallery({ projectId }: PhotoGalleryProps) {
 
   const [isUploading, setIsUploading] = useState(false);
   const [uploadCaption, setUploadCaption] = useState('');
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Get selected photo from URL
@@ -39,6 +40,7 @@ export function PhotoGallery({ projectId }: PhotoGalleryProps) {
     if (!file) return;
 
     setIsUploading(true);
+    setUploadError(null);
     try {
       await uploadPhoto.mutateAsync({
         projectId,
@@ -50,6 +52,8 @@ export function PhotoGallery({ projectId }: PhotoGalleryProps) {
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : 'Upload failed');
     } finally {
       setIsUploading(false);
     }
@@ -92,6 +96,11 @@ export function PhotoGallery({ projectId }: PhotoGalleryProps) {
           >
             {isUploading ? 'Uploading...' : 'Upload Photo'}
           </Button>
+          {uploadError && (
+            <div style={{ color: 'var(--color-danger)', fontSize: '0.875rem' }}>
+              {uploadError}
+            </div>
+          )}
         </div>
       )}
 

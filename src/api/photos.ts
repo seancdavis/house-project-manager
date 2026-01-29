@@ -20,12 +20,20 @@ function fileToBase64(file: File): Promise<string> {
   });
 }
 
+// Max file size before base64 encoding (~4.5MB to stay under 6MB limit after encoding)
+const MAX_FILE_SIZE = 4.5 * 1024 * 1024;
+
 export async function uploadPhoto(
   projectId: string,
   file: File,
   caption?: string,
   uploadedById?: string
 ): Promise<Photo> {
+  // Validate file size before encoding
+  if (file.size > MAX_FILE_SIZE) {
+    throw new Error(`File too large. Maximum size is ${(MAX_FILE_SIZE / (1024 * 1024)).toFixed(1)}MB`);
+  }
+
   const base64 = await fileToBase64(file);
 
   const response = await fetch(`/api/projects/${projectId}/photos`, {
