@@ -1,7 +1,7 @@
 import type { Context } from '@netlify/functions';
 import { eq } from 'drizzle-orm';
 import { db } from '../../db';
-import { members } from '../../db/schema';
+import { members, activities } from '../../db/schema';
 
 export default async (req: Request, context: Context) => {
   const headers = { 'Content-Type': 'application/json' };
@@ -44,20 +44,49 @@ export default async (req: Request, context: Context) => {
         headers
       });
     }
+
+    // Record activity
+    await db.insert(activities).values({
+      action: 'updated',
+      entityType: 'member',
+      entityId: updated.id,
+      entityTitle: updated.name,
+      actorId: body.actorId || null,
+    });
+
     return new Response(JSON.stringify(updated), { headers });
   }
 
   if (req.method === 'DELETE') {
-    const [deleted] = await db.delete(members)
-      .where(eq(members.id, id))
-      .returning();
-
-    if (!deleted) {
+    // Get member info before deletion for activity
+    const [member] = await db.select().from(members).where(eq(members.id, id));
+    if (!member) {
       return new Response(JSON.stringify({ error: 'Member not found' }), {
         status: 404,
         headers
       });
     }
+
+    // Get actorId from request body if provided
+    let actorId = null;
+    try {
+      const body = await req.json();
+      actorId = body.actorId || null;
+    } catch {
+      // No body provided
+    }
+
+    await db.delete(members).where(eq(members.id, id));
+
+    // Record activity
+    await db.insert(activities).values({
+      action: 'deleted',
+      entityType: 'member',
+      entityId: id,
+      entityTitle: member.name,
+      actorId,
+    });
+
     return new Response(JSON.stringify({ success: true }), { headers });
   }
 

@@ -18,10 +18,10 @@ export function createNote(data: {
   return post<Note>('/notes', data);
 }
 
-export function updateNote(id: string, content: string): Promise<Note> {
-  return put<Note>(`/notes/${id}`, { content });
+export function updateNote(id: string, content: string, actorId?: string): Promise<Note> {
+  return put<Note>(`/notes/${id}`, { content, actorId });
 }
 
-export function deleteNote(id: string): Promise<{ success: boolean }> {
-  return del<{ success: boolean }>(`/notes/${id}`);
+export function deleteNote(id: string, actorId?: string): Promise<{ success: boolean }> {
+  return del<{ success: boolean }>(`/notes/${id}`, actorId ? { actorId } : undefined);
 }

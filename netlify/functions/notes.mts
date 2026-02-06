@@ -1,7 +1,7 @@
 import type { Context } from '@netlify/functions';
 import { eq, desc, and, isNull, or } from 'drizzle-orm';
 import { db } from '../../db';
-import { notes, members } from '../../db/schema';
+import { notes, members, activities } from '../../db/schema';
 
 export default async (req: Request, context: Context) => {
   const headers = { 'Content-Type': 'application/json' };
@@ -94,6 +94,19 @@ export default async (req: Request, context: Context) => {
       content: body.content.trim(),
       authorId: body.authorId || null,
     }).returning();
+
+    // Record activity
+    const notePreview = newNote.content.length > 50
+      ? newNote.content.substring(0, 50) + '...'
+      : newNote.content;
+    await db.insert(activities).values({
+      action: 'created',
+      entityType: 'note',
+      entityId: newNote.id,
+      entityTitle: notePreview,
+      projectId: body.projectId || null,
+      actorId: body.authorId || null,
+    });
 
     // Fetch with author info
     if (newNote.authorId) {

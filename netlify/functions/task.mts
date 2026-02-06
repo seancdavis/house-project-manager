@@ -1,7 +1,7 @@
 import type { Context } from '@netlify/functions';
 import { eq } from 'drizzle-orm';
 import { db } from '../../db';
-import { tasks } from '../../db/schema';
+import { tasks, activities } from '../../db/schema';
 
 export default async (req: Request, context: Context) => {
   const headers = { 'Content-Type': 'application/json' };
@@ -58,20 +58,52 @@ export default async (req: Request, context: Context) => {
         headers
       });
     }
+
+    // Record activity - use 'completed' action if status changed to done
+    const action = body.status === 'done' ? 'completed' : 'updated';
+    await db.insert(activities).values({
+      action,
+      entityType: 'task',
+      entityId: updated.id,
+      entityTitle: updated.title,
+      projectId: updated.projectId,
+      actorId: body.actorId || null,
+    });
+
     return new Response(JSON.stringify(updated), { headers });
   }
 
   if (req.method === 'DELETE') {
-    const [deleted] = await db.delete(tasks)
-      .where(eq(tasks.id, id))
-      .returning();
-
-    if (!deleted) {
+    // Get task info before deletion for activity
+    const [task] = await db.select().from(tasks).where(eq(tasks.id, id));
+    if (!task) {
       return new Response(JSON.stringify({ error: 'Task not found' }), {
         status: 404,
         headers
       });
     }
+
+    // Get actorId from request body if provided
+    let actorId = null;
+    try {
+      const body = await req.json();
+      actorId = body.actorId || null;
+    } catch {
+      // No body provided
+    }
+
+    await db.delete(tasks).where(eq(tasks.id, id));
+
+    // Record activity
+    await db.insert(activities).values({
+      action: 'deleted',
+      entityType: 'task',
+      entityId: id,
+      entityTitle: task.title,
+      projectId: task.projectId,
+      actorId,
+    });
+
     return new Response(JSON.stringify({ success: true }), { headers });
   }
 

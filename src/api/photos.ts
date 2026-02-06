@@ -70,10 +70,10 @@ export async function uploadPhoto(
   return response.json();
 }
 
-export function updatePhoto(id: string, data: { caption?: string; filename?: string }): Promise<Photo> {
+export function updatePhoto(id: string, data: { caption?: string; filename?: string; actorId?: string }): Promise<Photo> {
   return patch<Photo>(`/photos/${id}`, data);
 }
 
-export function deletePhoto(id: string): Promise<{ success: boolean }> {
-  return del<{ success: boolean }>(`/photos/${id}`);
+export function deletePhoto(id: string, actorId?: string): Promise<{ success: boolean }> {
+  return del<{ success: boolean }>(`/photos/${id}`, actorId ? { actorId } : undefined);
 }

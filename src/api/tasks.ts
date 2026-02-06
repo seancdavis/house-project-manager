@@ -9,16 +9,16 @@ export function getTask(id: string): Promise<Task> {
   return get<Task>(`/tasks/${id}`);
 }
 
-export function createTask(projectId: string, data: Omit<TaskInput, 'projectId'>): Promise<Task> {
+export function createTask(projectId: string, data: Omit<TaskInput, 'projectId'> & { actorId?: string }): Promise<Task> {
   return post<Task>(`/projects/${projectId}/tasks`, data);
 }
 
-export function updateTask(id: string, data: Partial<TaskInput>): Promise<Task> {
+export function updateTask(id: string, data: Partial<TaskInput> & { actorId?: string }): Promise<Task> {
   return put<Task>(`/tasks/${id}`, data);
 }
 
-export function deleteTask(id: string): Promise<{ success: boolean }> {
-  return del<{ success: boolean }>(`/tasks/${id}`);
+export function deleteTask(id: string, actorId?: string): Promise<{ success: boolean }> {
+  return del<{ success: boolean }>(`/tasks/${id}`, actorId ? { actorId } : undefined);
 }
 
 export function reorderTasks(taskIds: string[]): Promise<{ success: boolean }> {

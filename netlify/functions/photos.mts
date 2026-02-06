@@ -2,7 +2,7 @@ import type { Context } from '@netlify/functions';
 import { getStore } from '@netlify/blobs';
 import { eq, desc } from 'drizzle-orm';
 import { db } from '../../db';
-import { photos } from '../../db/schema';
+import { photos, activities } from '../../db/schema';
 
 const STORE_NAME = 'project-photos';
 
@@ -84,6 +84,16 @@ export default async (req: Request, context: Context) => {
         size: size || buffer.length,
         uploadedById: uploadedById || null,
       }).returning();
+
+      // Record activity
+      await db.insert(activities).values({
+        action: 'created',
+        entityType: 'photo',
+        entityId: newPhoto.id,
+        entityTitle: filename,
+        projectId,
+        actorId: uploadedById || null,
+      });
 
       return new Response(JSON.stringify({
         ...newPhoto,

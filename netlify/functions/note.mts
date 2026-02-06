@@ -1,7 +1,7 @@
 import type { Context } from '@netlify/functions';
 import { eq } from 'drizzle-orm';
 import { db } from '../../db';
-import { notes, members } from '../../db/schema';
+import { notes, members, activities } from '../../db/schema';
 
 export default async (req: Request, context: Context) => {
   const headers = { 'Content-Type': 'application/json' };
@@ -39,6 +39,19 @@ export default async (req: Request, context: Context) => {
       });
     }
 
+    // Record activity
+    const notePreview = updated.content.length > 50
+      ? updated.content.substring(0, 50) + '...'
+      : updated.content;
+    await db.insert(activities).values({
+      action: 'updated',
+      entityType: 'note',
+      entityId: updated.id,
+      entityTitle: notePreview,
+      projectId: updated.projectId,
+      actorId: body.actorId || updated.authorId || null,
+    });
+
     // Fetch with author info
     if (updated.authorId) {
       const [author] = await db.select().from(members).where(eq(members.id, updated.authorId));
@@ -57,16 +70,38 @@ export default async (req: Request, context: Context) => {
   }
 
   if (req.method === 'DELETE') {
-    const [deleted] = await db.delete(notes)
-      .where(eq(notes.id, noteId))
-      .returning();
-
-    if (!deleted) {
+    // Get note info before deletion for activity
+    const [note] = await db.select().from(notes).where(eq(notes.id, noteId));
+    if (!note) {
       return new Response(JSON.stringify({ error: 'Note not found' }), {
         status: 404,
         headers
       });
     }
+
+    // Get actorId from request body if provided
+    let actorId = null;
+    try {
+      const body = await req.json();
+      actorId = body.actorId || null;
+    } catch {
+      // No body provided
+    }
+
+    await db.delete(notes).where(eq(notes.id, noteId));
+
+    // Record activity
+    const notePreview = note.content.length > 50
+      ? note.content.substring(0, 50) + '...'
+      : note.content;
+    await db.insert(activities).values({
+      action: 'deleted',
+      entityType: 'note',
+      entityId: noteId,
+      entityTitle: notePreview,
+      projectId: note.projectId,
+      actorId,
+    });
 
     return new Response(JSON.stringify({ success: true }), { headers });
   }

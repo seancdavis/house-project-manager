@@ -1,7 +1,7 @@
 import type { Context } from '@netlify/functions';
 import { eq, asc } from 'drizzle-orm';
 import { db } from '../../db';
-import { tasks } from '../../db/schema';
+import { tasks, activities } from '../../db/schema';
 
 export default async (req: Request, context: Context) => {
   const headers = { 'Content-Type': 'application/json' };
@@ -40,6 +40,17 @@ export default async (req: Request, context: Context) => {
         assigneeId: body.assigneeId,
         sortOrder: body.sortOrder ?? maxOrder + 1,
       }).returning();
+
+      // Record activity
+      await db.insert(activities).values({
+        action: 'created',
+        entityType: 'task',
+        entityId: newTask.id,
+        entityTitle: newTask.title,
+        projectId,
+        actorId: body.actorId || null,
+      });
+
       return new Response(JSON.stringify(newTask), { status: 201, headers });
     }
 

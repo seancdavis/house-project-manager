@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as api from '../api/photos';
 import { useToast } from '../context/ToastContext';
+import { useCurrentUser } from '../context/UserContext';
 
 export function usePhotos(projectId: string) {
   return useQuery({
@@ -27,6 +28,7 @@ export function useUploadPhoto() {
     }) => api.uploadPhoto(projectId, file, caption, uploadedById),
     onSuccess: (_, { projectId }) => {
       queryClient.invalidateQueries({ queryKey: ['photos', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
       showToast('Photo uploaded');
     },
     onError: (error: Error) => {
@@ -38,11 +40,13 @@ export function useUploadPhoto() {
 export function useUpdatePhoto() {
   const queryClient = useQueryClient();
   const { showToast } = useToast();
+  const { currentUser } = useCurrentUser();
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: { caption?: string; filename?: string } }) =>
-      api.updatePhoto(id, data),
+      api.updatePhoto(id, { ...data, actorId: currentUser?.id }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['photos'] });
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
       showToast('Photo updated');
     },
     onError: (error: Error) => {
@@ -54,10 +58,12 @@ export function useUpdatePhoto() {
 export function useDeletePhoto() {
   const queryClient = useQueryClient();
   const { showToast } = useToast();
+  const { currentUser } = useCurrentUser();
   return useMutation({
-    mutationFn: (id: string) => api.deletePhoto(id),
+    mutationFn: (id: string) => api.deletePhoto(id, currentUser?.id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['photos'] });
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
       showToast('Photo deleted');
     },
     onError: (error: Error) => {

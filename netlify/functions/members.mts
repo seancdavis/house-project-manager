@@ -1,6 +1,6 @@
 import type { Context } from '@netlify/functions';
 import { db } from '../../db';
-import { members } from '../../db/schema';
+import { members, activities } from '../../db/schema';
 
 export default async (req: Request, _context: Context) => {
   const headers = { 'Content-Type': 'application/json' };
@@ -19,6 +19,16 @@ export default async (req: Request, _context: Context) => {
         initials: body.initials,
         color: body.color,
       }).returning();
+
+      // Record activity
+      await db.insert(activities).values({
+        action: 'created',
+        entityType: 'member',
+        entityId: newMember.id,
+        entityTitle: newMember.name,
+        actorId: body.actorId || null,
+      });
+
       return new Response(JSON.stringify(newMember), { status: 201, headers });
     }
 

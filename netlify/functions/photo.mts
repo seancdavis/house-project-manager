@@ -2,7 +2,7 @@ import type { Context } from '@netlify/functions';
 import { getStore } from '@netlify/blobs';
 import { eq } from 'drizzle-orm';
 import { db } from '../../db';
-import { photos } from '../../db/schema';
+import { photos, activities } from '../../db/schema';
 
 const STORE_NAME = 'project-photos';
 
@@ -30,12 +30,31 @@ export default async (req: Request, context: Context) => {
       });
     }
 
+    // Get actorId from request body if provided
+    let actorId = null;
+    try {
+      const body = await req.json();
+      actorId = body.actorId || null;
+    } catch {
+      // No body provided
+    }
+
     try {
       // Delete from Netlify Blobs
       await store.delete(photo.blobKey);
 
       // Delete from database
       await db.delete(photos).where(eq(photos.id, photoId));
+
+      // Record activity
+      await db.insert(activities).values({
+        action: 'deleted',
+        entityType: 'photo',
+        entityId: photoId,
+        entityTitle: photo.filename,
+        projectId: photo.projectId,
+        actorId,
+      });
 
       return new Response(JSON.stringify({ success: true }), { headers });
     } catch (error) {
@@ -65,6 +84,16 @@ export default async (req: Request, context: Context) => {
           headers
         });
       }
+
+      // Record activity
+      await db.insert(activities).values({
+        action: 'updated',
+        entityType: 'photo',
+        entityId: updated.id,
+        entityTitle: updated.filename,
+        projectId: updated.projectId,
+        actorId: body.actorId || null,
+      });
 
       return new Response(JSON.stringify({
         ...updated,

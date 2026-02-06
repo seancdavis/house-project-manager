@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as api from '../api/members';
 import { useToast } from '../context/ToastContext';
+import { useCurrentUser } from '../context/UserContext';
 import type { MemberInput } from '../types';
 
 export function useMembers() {
@@ -21,10 +22,12 @@ export function useMember(id: string) {
 export function useCreateMember() {
   const queryClient = useQueryClient();
   const { showToast } = useToast();
+  const { currentUser } = useCurrentUser();
   return useMutation({
-    mutationFn: (data: MemberInput) => api.createMember(data),
+    mutationFn: (data: MemberInput) => api.createMember({ ...data, actorId: currentUser?.id }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['members'] });
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
       showToast('Member created');
     },
     onError: (error: Error) => {
@@ -36,11 +39,13 @@ export function useCreateMember() {
 export function useUpdateMember() {
   const queryClient = useQueryClient();
   const { showToast } = useToast();
+  const { currentUser } = useCurrentUser();
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: MemberInput }) =>
-      api.updateMember(id, data),
+      api.updateMember(id, { ...data, actorId: currentUser?.id }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['members'] });
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
       showToast('Member updated');
     },
     onError: (error: Error) => {
@@ -52,10 +57,12 @@ export function useUpdateMember() {
 export function useDeleteMember() {
   const queryClient = useQueryClient();
   const { showToast } = useToast();
+  const { currentUser } = useCurrentUser();
   return useMutation({
-    mutationFn: (id: string) => api.deleteMember(id),
+    mutationFn: (id: string) => api.deleteMember(id, currentUser?.id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['members'] });
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
       showToast('Member deleted');
     },
     onError: (error: Error) => {

@@ -1,7 +1,7 @@
 import type { Context } from '@netlify/functions';
 import { desc, eq } from 'drizzle-orm';
 import { db } from '../../db';
-import { projects, tags, projectTags } from '../../db/schema';
+import { projects, tags, projectTags, activities } from '../../db/schema';
 
 export default async (req: Request, _context: Context) => {
   const headers = { 'Content-Type': 'application/json' };
@@ -58,6 +58,16 @@ export default async (req: Request, _context: Context) => {
           }))
         );
       }
+
+      // Record activity
+      await db.insert(activities).values({
+        action: 'created',
+        entityType: 'project',
+        entityId: newProject.id,
+        entityTitle: newProject.title,
+        projectId: newProject.id,
+        actorId: body.actorId || null,
+      });
 
       return new Response(JSON.stringify(newProject), { status: 201, headers });
     }

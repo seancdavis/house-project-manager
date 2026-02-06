@@ -38,10 +38,15 @@ export async function put<T>(path: string, data: unknown): Promise<T> {
   return handleResponse<T>(response);
 }
 
-export async function del<T>(path: string): Promise<T> {
-  const response = await fetch(`${API_BASE}${path}`, {
+export async function del<T>(path: string, data?: unknown): Promise<T> {
+  const options: RequestInit = {
     method: 'DELETE',
-  });
+  };
+  if (data) {
+    options.headers = { 'Content-Type': 'application/json' };
+    options.body = JSON.stringify(data);
+  }
+  const response = await fetch(`${API_BASE}${path}`, options);
   return handleResponse<T>(response);
 }
 
