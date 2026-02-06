@@ -290,3 +290,168 @@ h1, h2, h3, h4, h5, h6 {
     order: -1;
   }
 }
+
+/* Sidebar base z-index (overridden to 300 on mobile) */
+.sidebar {
+  z-index: 100;
+}
+
+/* Mobile Header */
+.mobile-header {
+  display: none;
+}
+
+/* Sidebar backdrop */
+.sidebar-backdrop {
+  display: none;
+}
+
+/* Responsive: Mobile (max-width: 768px) */
+@media (max-width: 768px) {
+  /* Mobile header bar */
+  .mobile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    padding: 0 16px;
+    background-color: var(--bg-sidebar);
+    border-bottom: 1px solid var(--color-stone-200);
+    z-index: 200;
+  }
+
+  .mobile-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .mobile-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    color: var(--color-stone-600);
+    border-radius: var(--radius-sm);
+  }
+
+  .mobile-header-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+  }
+
+  .mobile-header-logo span {
+    font-family: var(--font-display);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-stone-900);
+  }
+
+  /* Sidebar: hidden by default, slide in as overlay */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: var(--sidebar-width);
+    transform: translateX(-100%);
+    transition: transform 250ms ease;
+    z-index: 300;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  /* Sidebar backdrop overlay */
+  .sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(28, 25, 23, 0.4);
+    z-index: 250;
+  }
+
+  .sidebar-backdrop.visible {
+    display: block;
+  }
+
+  /* Main content: remove sidebar margin, add top padding for mobile header */
+  .main-content {
+    margin-left: 0 !important;
+    padding-top: 56px;
+  }
+
+  .main-content > div {
+    padding: 16px !important;
+  }
+
+  /* Page headers: stack vertically */
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 12px;
+  }
+
+  /* Filter grid: stack to 1 column */
+  .filter-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Kanban grid: horizontal scroll */
+  .kanban-grid {
+    display: flex !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px;
+  }
+
+  .kanban-grid > div {
+    min-width: 260px;
+    flex-shrink: 0;
+  }
+
+  /* Member grid: smaller minimum */
+  .member-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important;
+  }
+
+  /* Form rows: stack to 1 column */
+  .form-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Modal: full-width on mobile */
+  .modal-container {
+    padding: 0 !important;
+    align-items: flex-end !important;
+  }
+
+  .modal-content {
+    max-width: 100% !important;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
+    max-height: 90vh !important;
+  }
+
+  .modal-content .modal-header {
+    padding: 16px !important;
+  }
+
+  .modal-content .modal-body {
+    padding: 16px !important;
+  }
+
+  /* Typography: scale down */
+  h1 {
+    font-size: 1.5rem !important;
+  }
+}

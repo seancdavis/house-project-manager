@@ -104,6 +104,7 @@ export function ProjectsPage() {
 
       {/* Header */}
       <div
+        className="page-header"
         style={{
           display: 'flex',
           justifyContent: 'space-between',
@@ -253,6 +254,7 @@ export function ProjectsPage() {
         {/* Expanded Filters */}
         {showFilters && (
           <div
+            className="filter-grid"
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(3, 1fr)',

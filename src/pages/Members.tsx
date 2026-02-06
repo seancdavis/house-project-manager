@@ -71,6 +71,7 @@ export function MembersPage() {
 
       {/* Header */}
       <div
+        className="page-header"
         style={{
           display: 'flex',
           justifyContent: 'space-between',
@@ -174,6 +175,7 @@ export function MembersPage() {
             </span>
           </h2>
           <div
+            className="member-grid"
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
@@ -208,6 +210,7 @@ export function MembersPage() {
             </span>
           </h2>
           <div
+            className="member-grid"
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',

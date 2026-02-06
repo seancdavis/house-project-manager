@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { Home, FolderKanban, Users, LogOut } from 'lucide-react';
+import { Home, FolderKanban, Users, LogOut, Menu, X } from 'lucide-react';
 import { useCurrentUser } from '../../context/UserContext';
 import { Avatar } from '../ui';
 
@@ -12,16 +13,75 @@ const navItems = [
 export function AppLayout() {
   const location = useLocation();
   const { currentUser, setCurrentUser } = useCurrentUser();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/';
     return location.pathname.startsWith(path);
   };
 
+  const closeSidebar = () => setSidebarOpen(false);
+
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
+      {/* Mobile Header */}
+      <div className="mobile-header">
+        <div className="mobile-header-left">
+          <button
+            className="mobile-menu-btn"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            aria-label={sidebarOpen ? 'Close menu' : 'Open menu'}
+          >
+            {sidebarOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+          <Link to="/" className="mobile-header-logo" onClick={closeSidebar}>
+            <div
+              style={{
+                width: '28px',
+                height: '28px',
+                borderRadius: 'var(--radius-md)',
+                background: 'linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-primary-600) 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Home size={15} color="white" />
+            </div>
+            <span>House Projects</span>
+          </Link>
+        </div>
+        {currentUser ? (
+          <Avatar
+            initials={currentUser.initials}
+            color={currentUser.color}
+            size="sm"
+          />
+        ) : (
+          <Link
+            to="/login"
+            onClick={closeSidebar}
+            style={{
+              color: 'var(--color-primary-600)',
+              textDecoration: 'none',
+              fontSize: '0.875rem',
+              fontWeight: 500,
+            }}
+          >
+            Sign In
+          </Link>
+        )}
+      </div>
+
+      {/* Sidebar Backdrop */}
+      <div
+        className={`sidebar-backdrop ${sidebarOpen ? 'visible' : ''}`}
+        onClick={closeSidebar}
+      />
+
       {/* Sidebar */}
       <aside
+        className={`sidebar ${sidebarOpen ? 'open' : ''}`}
         style={{
           width: 'var(--sidebar-width)',
           backgroundColor: 'var(--bg-sidebar)',
@@ -32,7 +92,6 @@ export function AppLayout() {
           top: 0,
           left: 0,
           bottom: 0,
-          zIndex: 100,
         }}
       >
         {/* Logo */}
@@ -44,6 +103,7 @@ export function AppLayout() {
         >
           <Link
             to="/"
+            onClick={closeSidebar}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -87,6 +147,7 @@ export function AppLayout() {
                 <li key={item.path} style={{ marginBottom: '2px' }}>
                   <Link
                     to={item.path}
+                    onClick={closeSidebar}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -192,6 +253,7 @@ export function AppLayout() {
           ) : (
             <Link
               to="/login"
+              onClick={closeSidebar}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -221,6 +283,7 @@ export function AppLayout() {
 
       {/* Main Content */}
       <main
+        className="main-content"
         style={{
           flex: 1,
           marginLeft: 'var(--sidebar-width)',

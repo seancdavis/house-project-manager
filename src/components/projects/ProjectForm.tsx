@@ -85,7 +85,7 @@ export function ProjectForm({ project, onSubmit, onCancel }: ProjectFormProps) {
         />
       </InputWrapper>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+      <div className="form-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
         <InputWrapper label="Type">
           <Select {...register('type')}>
             <option value="diy">DIY</option>
@@ -115,7 +115,7 @@ export function ProjectForm({ project, onSubmit, onCancel }: ProjectFormProps) {
         </InputWrapper>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+      <div className="form-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
         <InputWrapper label="Owner">
           <Select {...register('ownerId')}>
             <option value="">Select owner...</option>
@@ -139,7 +139,7 @@ export function ProjectForm({ project, onSubmit, onCancel }: ProjectFormProps) {
         <Input type="date" {...register('targetDate')} />
       </InputWrapper>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+      <div className="form-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
         <InputWrapper label="Estimated Budget ($)">
           <Input
             type="number"

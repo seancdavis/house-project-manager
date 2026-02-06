@@ -63,7 +63,7 @@ export function DashboardPage() {
   return (
     <div className="animate-fade-in">
       {/* Header */}
-      <div style={{ marginBottom: '32px' }}>
+      <div className="page-header" style={{ marginBottom: '32px' }}>
         <h1 style={{ fontSize: '2rem', marginBottom: '8px' }}>
           {currentUser ? `Welcome back, ${currentUser.name.split(' ')[0]}` : 'Dashboard'}
         </h1>

@@ -37,6 +37,7 @@ export function ProjectsKanban({ projects }: ProjectsKanbanProps) {
 
   return (
     <div
+      className="kanban-grid"
       style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(4, 1fr)',
@@ -118,11 +119,9 @@ export function ProjectsKanban({ projects }: ProjectsKanbanProps) {
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.boxShadow = 'var(--shadow-md)';
-                      e.currentTarget.style.transform = 'translateY(-2px)';
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
-                      e.currentTarget.style.transform = 'translateY(0)';
                     }}
                   >
                     {/* Card Title */}

@@ -67,7 +67,7 @@ export function ProjectDetailPage() {
       <ReadOnlyBanner />
 
       {/* Header */}
-      <div style={{ marginBottom: '24px' }}>
+      <div className="page-header" style={{ marginBottom: '24px' }}>
         <h1 style={{ fontSize: '1.75rem', margin: '0 0 12px 0' }}>{project.title}</h1>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
           <StatusBadge status={project.status} />

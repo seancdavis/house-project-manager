@@ -46,6 +46,7 @@ export function Modal({
 
   return (
     <div
+      className="modal-container"
       style={{
         position: 'fixed',
         inset: 0,
@@ -70,6 +71,7 @@ export function Modal({
 
       {/* Modal */}
       <div
+        className="modal-content"
         style={{
           position: 'relative',
           width: '100%',
@@ -85,6 +87,7 @@ export function Modal({
       >
         {/* Header */}
         <div
+          className="modal-header"
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -111,7 +114,7 @@ export function Modal({
         </div>
 
         {/* Content */}
-        <div style={{
+        <div className="modal-body" style={{
           padding: '24px',
           overflowY: 'auto',
         }}>
