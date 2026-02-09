@@ -6,6 +6,7 @@ import { useMembers } from '../hooks/useMembers';
 import { useCurrentUser } from '../context/UserContext';
 import { ProjectForm } from '../components/projects/ProjectForm';
 import { TaskList } from '../components/tasks/TaskList';
+import { TaskDetailModal } from '../components/tasks/TaskDetailModal';
 import { PhotoGallery } from '../components/photos/PhotoGallery';
 import { NotesSection } from '../components/notes/NotesSection';
 import { Card, Button, StatusBadge, TypeBadge, PriorityBadge, TagBadge, Avatar, Modal, PageLoading, ReadOnlyBanner } from '../components/ui';
@@ -29,6 +30,10 @@ export function ProjectDetailPage() {
   const owner = members?.find(m => m.id === project.ownerId);
   const implementer = members?.find(m => m.id === project.implementerId);
   const canEdit = !!currentUser;
+
+  const handleTaskClick = (taskId: string) => {
+    navigate(`/projects/${project.id}/tasks/${taskId}`);
+  };
 
   const handleUpdate = (data: ProjectInput) => {
     updateProject.mutate({ id: project.id, data }, {
@@ -135,6 +140,9 @@ export function ProjectDetailPage() {
         )}
       </Modal>
 
+      {/* Task Detail Modal */}
+      <TaskDetailModal projectId={project.id} />
+
       {/* Content Grid */}
       <div className="project-detail-grid">
         {/* Main Content */}
@@ -156,7 +164,7 @@ export function ProjectDetailPage() {
             <h3 style={{ fontSize: '1rem', marginBottom: '16px', color: 'var(--color-stone-700)' }}>
               Tasks
             </h3>
-            <TaskList projectId={project.id} />
+            <TaskList projectId={project.id} onTaskClick={handleTaskClick} />
           </Card>
 
           {/* Photos */}

@@ -24,9 +24,10 @@ import type { Task, TaskStatus } from '../../types';
 
 interface TaskListProps {
   projectId: string;
+  onTaskClick?: (taskId: string) => void;
 }
 
-export function TaskList({ projectId }: TaskListProps) {
+export function TaskList({ projectId, onTaskClick }: TaskListProps) {
   const { currentUser } = useCurrentUser();
   const { data: tasks, isLoading } = useTasks(projectId);
   const createTask = useCreateTask(projectId);
@@ -136,6 +137,7 @@ export function TaskList({ projectId }: TaskListProps) {
                   onToggle={() => handleToggleStatus(task)}
                   onDelete={() => handleDelete(task.id)}
                   onEdit={(newTitle) => handleEditTask(task, newTitle)}
+                  onClick={onTaskClick ? () => onTaskClick(task.id) : undefined}
                   disabled={!currentUser || reorderTasks.isPending}
                   style={{ animationDelay: `${index * 30}ms` }}
                 />
@@ -169,6 +171,7 @@ export function TaskList({ projectId }: TaskListProps) {
               onToggle={() => handleToggleStatus(task)}
               onDelete={() => handleDelete(task.id)}
               onEdit={(newTitle) => handleEditTask(task, newTitle)}
+              onClick={onTaskClick ? () => onTaskClick(task.id) : undefined}
               disabled={!currentUser}
               style={{ animationDelay: `${index * 30}ms` }}
             />
@@ -184,6 +187,7 @@ interface TaskItemProps {
   onToggle: () => void;
   onDelete: () => void;
   onEdit: (newTitle: string) => void;
+  onClick?: () => void;
   disabled?: boolean;
   style?: React.CSSProperties;
   dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
@@ -222,6 +226,7 @@ function TaskItem({
   onToggle,
   onDelete,
   onEdit,
+  onClick,
   disabled,
   style,
   dragHandleProps,
@@ -332,13 +337,13 @@ function TaskItem({
         />
       ) : (
         <span
-          onClick={!disabled && !isDone ? () => setIsEditing(true) : undefined}
+          onClick={onClick}
           style={{
             flex: 1,
             fontSize: '0.9375rem',
             color: isDone ? 'var(--color-stone-400)' : 'var(--color-stone-700)',
             textDecoration: isDone ? 'line-through' : 'none',
-            cursor: !disabled && !isDone ? 'text' : 'default',
+            cursor: onClick ? 'pointer' : 'default',
           }}
         >
           {task.title}

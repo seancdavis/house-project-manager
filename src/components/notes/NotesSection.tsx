@@ -1,16 +1,19 @@
 import { useState } from 'react';
 import { MessageSquare, Send, Edit2, Trash2, X, Check } from 'lucide-react';
-import { useProjectNotes, useCreateNote, useUpdateNote, useDeleteNote } from '../../hooks/useNotes';
+import { useProjectNotes, useTaskNotes, useCreateNote, useUpdateNote, useDeleteNote } from '../../hooks/useNotes';
 import { useCurrentUser } from '../../context/UserContext';
 import { Button, Avatar, EmptyState, Loading } from '../ui';
 import type { Note } from '../../types';
 
 interface NotesSectionProps {
-  projectId: string;
+  projectId?: string;
+  taskId?: string;
 }
 
-export function NotesSection({ projectId }: NotesSectionProps) {
-  const { data: notes, isLoading } = useProjectNotes(projectId);
+export function NotesSection({ projectId, taskId }: NotesSectionProps) {
+  const projectNotes = useProjectNotes(projectId || '');
+  const taskNotes = useTaskNotes(taskId || '');
+  const { data: notes, isLoading } = taskId ? taskNotes : projectNotes;
   const createNote = useCreateNote();
   const updateNote = useUpdateNote();
   const deleteNote = useDeleteNote();
@@ -25,7 +28,8 @@ export function NotesSection({ projectId }: NotesSectionProps) {
     if (!newNote.trim() || !currentUser) return;
 
     await createNote.mutateAsync({
-      projectId,
+      projectId: projectId || undefined,
+      taskId: taskId || undefined,
       content: newNote.trim(),
       authorId: currentUser.id,
     });

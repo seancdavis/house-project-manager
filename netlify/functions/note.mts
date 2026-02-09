@@ -1,7 +1,7 @@
 import type { Context } from '@netlify/functions';
 import { eq } from 'drizzle-orm';
 import { db } from '../../db';
-import { notes, members, activities } from '../../db/schema';
+import { notes, members, activities, tasks } from '../../db/schema';
 
 export default async (req: Request, context: Context) => {
   const headers = { 'Content-Type': 'application/json' };
@@ -39,16 +39,21 @@ export default async (req: Request, context: Context) => {
       });
     }
 
-    // Record activity
+    // Record activity - resolve projectId from task if needed
     const notePreview = updated.content.length > 50
       ? updated.content.substring(0, 50) + '...'
       : updated.content;
+    let activityProjectId = updated.projectId;
+    if (!activityProjectId && updated.taskId) {
+      const [task] = await db.select({ projectId: tasks.projectId }).from(tasks).where(eq(tasks.id, updated.taskId));
+      if (task) activityProjectId = task.projectId;
+    }
     await db.insert(activities).values({
       action: 'updated',
       entityType: 'note',
       entityId: updated.id,
       entityTitle: notePreview,
-      projectId: updated.projectId,
+      projectId: activityProjectId,
       actorId: body.actorId || updated.authorId || null,
     });
 
@@ -90,16 +95,21 @@ export default async (req: Request, context: Context) => {
 
     await db.delete(notes).where(eq(notes.id, noteId));
 
-    // Record activity
+    // Record activity - resolve projectId from task if needed
     const notePreview = note.content.length > 50
       ? note.content.substring(0, 50) + '...'
       : note.content;
+    let activityProjectId = note.projectId;
+    if (!activityProjectId && note.taskId) {
+      const [task] = await db.select({ projectId: tasks.projectId }).from(tasks).where(eq(tasks.id, note.taskId));
+      if (task) activityProjectId = task.projectId;
+    }
     await db.insert(activities).values({
       action: 'deleted',
       entityType: 'note',
       entityId: noteId,
       entityTitle: notePreview,
-      projectId: note.projectId,
+      projectId: activityProjectId,
       actorId,
     });
 
