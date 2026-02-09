@@ -136,7 +136,7 @@ export function TaskList({ projectId }: TaskListProps) {
                   onToggle={() => handleToggleStatus(task)}
                   onDelete={() => handleDelete(task.id)}
                   onEdit={(newTitle) => handleEditTask(task, newTitle)}
-                  disabled={!currentUser}
+                  disabled={!currentUser || reorderTasks.isPending}
                   style={{ animationDelay: `${index * 30}ms` }}
                 />
               ))}

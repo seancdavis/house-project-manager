@@ -13,26 +13,37 @@ export default async (req: Request, _context: Context) => {
     });
   }
 
-  const body = await req.json();
+  try {
+    const body = await req.json();
 
-  // Expecting: { taskIds: string[] } - tasks in new order
-  if (!body.taskIds || !Array.isArray(body.taskIds)) {
-    return new Response(JSON.stringify({ error: 'taskIds array required' }), {
-      status: 400,
+    // Expecting: { taskIds: string[] } - tasks in new order
+    if (!body.taskIds || !Array.isArray(body.taskIds)) {
+      return new Response(JSON.stringify({ error: 'taskIds array required' }), {
+        status: 400,
+        headers
+      });
+    }
+
+    // Update sortOrder for each task based on position
+    for (let i = 0; i < body.taskIds.length; i++) {
+      await db.update(tasks)
+        .set({ sortOrder: i, updatedAt: new Date() })
+        .where(eq(tasks.id, body.taskIds[i]));
+    }
+
+    return new Response(JSON.stringify({ success: true }), { headers });
+  } catch (error) {
+    console.error('Tasks reorder error:', error);
+    return new Response(JSON.stringify({
+      error: 'Failed to reorder tasks',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }), {
+      status: 500,
       headers
     });
   }
-
-  // Update sortOrder for each task based on position
-  for (let i = 0; i < body.taskIds.length; i++) {
-    await db.update(tasks)
-      .set({ sortOrder: i, updatedAt: new Date() })
-      .where(eq(tasks.id, body.taskIds[i]));
-  }
-
-  return new Response(JSON.stringify({ success: true }), { headers });
 };
 
 export const config = {
-  path: '/api/tasks/reorder',
+  path: '/api/tasks-reorder',
 };
