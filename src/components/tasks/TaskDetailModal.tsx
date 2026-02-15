@@ -1,9 +1,10 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { useTasks, useUpdateTask } from '../../hooks/useTasks';
+import { Trash2 } from 'lucide-react';
+import { useTasks, useUpdateTask, useDeleteTask } from '../../hooks/useTasks';
 import { useMembers } from '../../hooks/useMembers';
 import { useCurrentUser } from '../../context/UserContext';
 import { NotesSection } from '../notes/NotesSection';
-import { Modal, Avatar, StatusBadge, Select } from '../ui';
+import { Modal, Avatar, StatusBadge, Select, InlineEdit, Button } from '../ui';
 import type { Task, TaskStatus } from '../../types';
 
 interface TaskDetailModalProps {
@@ -23,6 +24,7 @@ export function TaskDetailModal({ projectId }: TaskDetailModalProps) {
   const { data: members } = useMembers();
   const { currentUser } = useCurrentUser();
   const updateTask = useUpdateTask(projectId);
+  const deleteTask = useDeleteTask(projectId);
 
   const task = taskId ? tasks?.find((t: Task) => t.id === taskId) || null : null;
 
@@ -40,13 +42,37 @@ export function TaskDetailModal({ projectId }: TaskDetailModalProps) {
     updateTask.mutate({ id: task.id, data: { assigneeId: newAssigneeId || undefined } });
   };
 
+  const handleTitleSave = (newTitle: string) => {
+    if (!task || !currentUser || !newTitle.trim()) return;
+    updateTask.mutate({ id: task.id, data: { title: newTitle.trim() } });
+  };
+
+  const handleDelete = () => {
+    if (!task || !currentUser) return;
+    deleteTask.mutate(task.id, {
+      onSuccess: () => handleClose(),
+    });
+  };
+
   const assignee = task?.assigneeId ? members?.find(m => m.id === task.assigneeId) : null;
+
+  const modalTitle = task && currentUser ? (
+    <InlineEdit
+      value={task.title}
+      onSave={handleTitleSave}
+      variant="title"
+      required
+      isPending={updateTask.isPending}
+    />
+  ) : (
+    task?.title || 'Task'
+  );
 
   return (
     <Modal
       isOpen={!!task}
       onClose={handleClose}
-      title={task?.title || 'Task'}
+      title={modalTitle}
       size="lg"
     >
       {task && (
@@ -161,6 +187,28 @@ export function TaskDetailModal({ projectId }: TaskDetailModalProps) {
             </h3>
             <NotesSection taskId={task.id} />
           </div>
+
+          {/* Delete Task */}
+          {currentUser && (
+            <div
+              style={{
+                borderTop: '1px solid var(--color-stone-100)',
+                paddingTop: '20px',
+                marginTop: '20px',
+                display: 'flex',
+                justifyContent: 'flex-end',
+              }}
+            >
+              <Button
+                variant="danger"
+                size="sm"
+                icon={<Trash2 size={14} />}
+                onClick={handleDelete}
+              >
+                Delete Task
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </Modal>
