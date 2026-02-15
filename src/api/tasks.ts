@@ -22,5 +22,5 @@ export function deleteTask(id: string, actorId?: string): Promise<{ success: boo
 }
 
 export function reorderTasks(taskIds: string[]): Promise<{ success: boolean }> {
-  return put<{ success: boolean }>('/tasks/reorder', { taskIds });
+  return put<{ success: boolean }>('/tasks-reorder', { taskIds });
 }

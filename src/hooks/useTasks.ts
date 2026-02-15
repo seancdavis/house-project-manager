@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as api from '../api/tasks';
 import { useToast } from '../context/ToastContext';
 import { useCurrentUser } from '../context/UserContext';
-import type { TaskInput } from '../types';
+import type { Task, TaskInput } from '../types';
 
 export function useTasks(projectId: string) {
   return useQuery({
@@ -66,9 +66,44 @@ export function useDeleteTask(projectId: string) {
 
 export function useReorderTasks(projectId: string) {
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
   return useMutation({
     mutationFn: (taskIds: string[]) => api.reorderTasks(taskIds),
-    onSuccess: () => {
+    onMutate: async (taskIds: string[]) => {
+      // Cancel any outgoing refetches so they don't overwrite our optimistic update
+      await queryClient.cancelQueries({ queryKey: ['tasks', projectId] });
+
+      // Snapshot previous tasks for rollback
+      const previousTasks = queryClient.getQueryData<Task[]>(['tasks', projectId]);
+
+      // Optimistically update the cache with the new order
+      if (previousTasks) {
+        const taskMap = new Map(previousTasks.map(t => [t.id, t]));
+        const reorderedTasks = taskIds
+          .map((id, index) => {
+            const task = taskMap.get(id);
+            return task ? { ...task, sortOrder: index } : null;
+          })
+          .filter((t): t is Task => t !== null);
+
+        // Include done tasks that weren't in the reorder list
+        const doneTasks = previousTasks.filter(t => t.status === 'done');
+        const newTasks = [...reorderedTasks, ...doneTasks];
+
+        queryClient.setQueryData(['tasks', projectId], newTasks);
+      }
+
+      return { previousTasks };
+    },
+    onError: (_error: Error, _taskIds: string[], context) => {
+      // Rollback to previous state on error
+      if (context?.previousTasks) {
+        queryClient.setQueryData(['tasks', projectId], context.previousTasks);
+      }
+      showToast('Failed to reorder tasks', 'error');
+    },
+    onSettled: () => {
+      // Refetch after mutation settles to ensure server state is in sync
       queryClient.invalidateQueries({ queryKey: ['tasks', projectId] });
     },
   });
