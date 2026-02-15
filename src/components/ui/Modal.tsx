@@ -63,7 +63,7 @@ export function Modal({
         style={{
           position: 'absolute',
           inset: 0,
-          backgroundColor: 'rgba(28, 25, 23, 0.5)',
+          backgroundColor: 'var(--color-backdrop)',
           backdropFilter: 'blur(4px)',
           animation: 'fadeIn 200ms ease-out',
         }}

@@ -39,7 +39,7 @@ const hoverStyles: Record<ButtonVariant, React.CSSProperties> = {
   primary: { backgroundColor: 'var(--color-primary-700)' },
   secondary: { backgroundColor: 'var(--color-stone-50)', borderColor: 'var(--color-stone-300)' },
   ghost: { backgroundColor: 'var(--color-stone-100)' },
-  danger: { backgroundColor: '#B91C1C' },
+  danger: { backgroundColor: 'var(--color-danger-hover)' },
 };
 
 const sizeStyles: Record<ButtonSize, React.CSSProperties> = {

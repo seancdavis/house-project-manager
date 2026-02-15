@@ -107,7 +107,8 @@ export function NotesSection({ projectId }: NotesSectionProps) {
                   fontSize: '0.9375rem',
                   resize: 'vertical',
                   minHeight: '80px',
-                  backgroundColor: 'white',
+                  backgroundColor: 'var(--bg-card)',
+                  color: 'var(--color-stone-800)',
                 }}
               />
               <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
@@ -224,6 +225,8 @@ export function NotesSection({ projectId }: NotesSectionProps) {
                         fontSize: '0.9375rem',
                         resize: 'vertical',
                         minHeight: '60px',
+                        backgroundColor: 'var(--bg-card)',
+                        color: 'var(--color-stone-800)',
                       }}
                     />
                     <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>

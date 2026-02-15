@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { Home, FolderKanban, Users, LogOut, Menu, X } from 'lucide-react';
+import { Home, FolderKanban, Users, LogOut, Menu, X, Sun, Moon, Monitor } from 'lucide-react';
 import { useCurrentUser } from '../../context/UserContext';
+import { useTheme } from '../../context/ThemeContext';
 import { Avatar } from '../ui';
 
 const navItems = [
@@ -13,6 +14,7 @@ const navItems = [
 export function AppLayout() {
   const location = useLocation();
   const { currentUser, setCurrentUser } = useCurrentUser();
+  const { mode, setMode } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const isActive = (path: string) => {
@@ -182,6 +184,59 @@ export function AppLayout() {
             })}
           </ul>
         </nav>
+
+        {/* Theme Toggle */}
+        <div
+          style={{
+            padding: '8px 12px',
+            borderTop: '1px solid var(--color-stone-200)',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              backgroundColor: 'var(--color-stone-100)',
+              borderRadius: 'var(--radius-md)',
+              padding: '2px',
+            }}
+          >
+            {([
+              { value: 'light' as const, icon: Sun, label: 'Light' },
+              { value: 'system' as const, icon: Monitor, label: 'System' },
+              { value: 'dark' as const, icon: Moon, label: 'Dark' },
+            ]).map((option) => {
+              const Icon = option.icon;
+              const isSelected = mode === option.value;
+              return (
+                <button
+                  key={option.value}
+                  onClick={() => setMode(option.value)}
+                  title={option.label}
+                  style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '4px',
+                    padding: '6px 4px',
+                    border: 'none',
+                    borderRadius: 'var(--radius-sm)',
+                    cursor: 'pointer',
+                    fontSize: '0.75rem',
+                    fontWeight: isSelected ? 500 : 400,
+                    backgroundColor: isSelected ? 'var(--bg-card)' : 'transparent',
+                    color: isSelected ? 'var(--color-stone-900)' : 'var(--color-stone-500)',
+                    boxShadow: isSelected ? 'var(--shadow-sm)' : 'none',
+                    transition: 'all var(--transition-fast)',
+                  }}
+                >
+                  <Icon size={14} />
+                  <span>{option.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
         {/* User Section */}
         <div

@@ -66,6 +66,8 @@ export function InlineEdit({
             fontSize: variant === 'title' ? '1.0625rem' : '0.9375rem',
             fontWeight: variant === 'title' ? 600 : 'normal',
             fontFamily: 'var(--font-body)',
+            backgroundColor: 'var(--bg-card)',
+            color: 'var(--color-stone-800)',
           }}
           onKeyDown={handleKeyDown}
         />
