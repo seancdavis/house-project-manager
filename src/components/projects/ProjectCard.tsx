@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Calendar, ArrowRight } from 'lucide-react';
 import { useMembers } from '../../hooks/useMembers';
-import { Card, StatusBadge, TypeBadge, Avatar } from '../ui';
+import { Card, StatusBadge, TypeBadge, Avatar, Badge, TagBadge } from '../ui';
 import type { Project } from '../../types';
 
 interface ProjectCardProps {
@@ -56,6 +56,18 @@ export function ProjectCard({ project, compact = false }: ProjectCardProps) {
               >
                 {project.description}
               </p>
+            )}
+
+            {/* Tags */}
+            {project.tags && project.tags.length > 0 && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '8px' }}>
+                {project.tags.slice(0, 3).map(tag => (
+                  <TagBadge key={tag.id} name={tag.name} size="sm" />
+                ))}
+                {project.tags.length > 3 && (
+                  <Badge variant="default" size="sm">+{project.tags.length - 3}</Badge>
+                )}
+              </div>
             )}
 
             {/* Meta */}
