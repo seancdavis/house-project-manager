@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Calendar } from 'lucide-react';
 import { useMembers } from '../../hooks/useMembers';
-import { TypeBadge, PriorityBadge, Avatar, Badge } from '../ui';
+import { TypeBadge, PriorityBadge, Avatar, Badge, TagBadge } from '../ui';
 import type { Project, ProjectStatus } from '../../types';
 
 interface ProjectsKanbanProps {
@@ -163,9 +163,7 @@ export function ProjectsKanban({ projects }: ProjectsKanbanProps) {
                         }}
                       >
                         {project.tags.slice(0, 2).map(tag => (
-                          <Badge key={tag.id} variant="default" size="sm">
-                            {tag.name}
-                          </Badge>
+                          <TagBadge key={tag.id} name={tag.name} size="sm" />
                         ))}
                         {project.tags.length > 2 && (
                           <Badge variant="default" size="sm">+{project.tags.length - 2}</Badge>

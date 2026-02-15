@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Edit2, Calendar, User, Wrench, DollarSign, Flag, Tag } from 'lucide-react';
+import { ArrowLeft, Edit2, Calendar, User, Wrench, DollarSign, Flag } from 'lucide-react';
 import { useProject, useUpdateProject, useDeleteProject } from '../hooks/useProjects';
 import { useMembers } from '../hooks/useMembers';
 import { useCurrentUser } from '../context/UserContext';
@@ -8,7 +8,7 @@ import { ProjectForm } from '../components/projects/ProjectForm';
 import { TaskList } from '../components/tasks/TaskList';
 import { PhotoGallery } from '../components/photos/PhotoGallery';
 import { NotesSection } from '../components/notes/NotesSection';
-import { Card, Button, StatusBadge, TypeBadge, PriorityBadge, Badge, Avatar, Modal, PageLoading, ReadOnlyBanner } from '../components/ui';
+import { Card, Button, StatusBadge, TypeBadge, PriorityBadge, TagBadge, Avatar, Modal, PageLoading, ReadOnlyBanner } from '../components/ui';
 import type { ProjectInput } from '../types';
 
 export function ProjectDetailPage() {
@@ -76,10 +76,7 @@ export function ProjectDetailPage() {
           {project.tags && project.tags.length > 0 && (
             <>
               {project.tags.map(tag => (
-                <Badge key={tag.id} variant="default">
-                  <Tag size={12} style={{ marginRight: '4px' }} />
-                  {tag.name}
-                </Badge>
+                <TagBadge key={tag.id} name={tag.name} size="md" />
               ))}
             </>
           )}

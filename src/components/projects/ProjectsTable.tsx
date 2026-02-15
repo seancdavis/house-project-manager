@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useMembers } from '../../hooks/useMembers';
-import { StatusBadge, TypeBadge, PriorityBadge, Avatar, Badge } from '../ui';
+import { StatusBadge, TypeBadge, PriorityBadge, Avatar, Badge, TagBadge } from '../ui';
 import type { Project } from '../../types';
 
 interface ProjectsTableProps {
@@ -94,9 +94,7 @@ export function ProjectsTable({ projects }: ProjectsTableProps) {
                     {project.tags && project.tags.length > 0 && (
                       <div style={{ display: 'flex', gap: '4px', marginTop: '4px' }}>
                         {project.tags.slice(0, 2).map(tag => (
-                          <Badge key={tag.id} variant="default" size="sm">
-                            {tag.name}
-                          </Badge>
+                          <TagBadge key={tag.id} name={tag.name} size="sm" />
                         ))}
                         {project.tags.length > 2 && (
                           <Badge variant="default" size="sm">+{project.tags.length - 2}</Badge>

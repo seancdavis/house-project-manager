@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Tag } from 'lucide-react';
 
 type BadgeVariant = 'default' | 'primary' | 'success' | 'warning' | 'info' | 'neutral';
 type BadgeSize = 'sm' | 'md';
@@ -133,4 +134,14 @@ export function PriorityBadge({ priority }: { priority: string | null }) {
   const { label, variant } = config[priority] || { label: priority, variant: 'default' as BadgeVariant };
 
   return <Badge variant={variant}>{label}</Badge>;
+}
+
+export function TagBadge({ name, size = 'sm' }: { name: string; size?: BadgeSize }) {
+  const iconSize = size === 'sm' ? 10 : 12;
+  return (
+    <Badge variant="default" size={size}>
+      <Tag size={iconSize} />
+      {name}
+    </Badge>
+  );
 }
