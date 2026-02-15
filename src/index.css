@@ -73,12 +73,94 @@
   /* Transitions */
   --transition-fast: 150ms ease;
   --transition-normal: 200ms ease;
+
+  /* Overlay */
+  --color-backdrop: rgba(28, 25, 23, 0.5);
+  --color-backdrop-light: rgba(28, 25, 23, 0.4);
+
+  /* Text on colored backgrounds */
+  --color-on-primary: white;
+  --color-on-accent: white;
+
+  /* Misc */
+  --color-select-arrow: %2378716C;
+  --color-danger-hover: #B91C1C;
+  --color-tag-remove-bg: rgba(0, 0, 0, 0.1);
+}
+
+/* Dark Mode */
+[data-theme="dark"] {
+  /* Primary Colors - adjusted for dark backgrounds
+     50-100: dark blue backgrounds for subtle highlights
+     500-600: keep medium-blue for buttons (needs white text contrast)
+     700-900: lighter blues for text/links on dark backgrounds */
+  --color-primary-50: #1E293B;
+  --color-primary-100: #1E3A5F;
+  --color-primary-200: #1D4ED8;
+  --color-primary-300: #3B82F6;
+  --color-primary-400: #60A5FA;
+  --color-primary-500: #3B82F6;
+  --color-primary-600: #2563EB;
+  --color-primary-700: #93C5FD;
+  --color-primary-800: #BFDBFE;
+  --color-primary-900: #EFF6FF;
+
+  /* Neutral Colors - inverted for dark mode */
+  --color-stone-50: #1A1D23;
+  --color-stone-100: #1F2937;
+  --color-stone-200: #374151;
+  --color-stone-300: #4B5563;
+  --color-stone-400: #9CA3AF;
+  --color-stone-500: #9CA3AF;
+  --color-stone-600: #D1D5DB;
+  --color-stone-700: #E5E7EB;
+  --color-stone-800: #F3F4F6;
+  --color-stone-900: #F9FAFB;
+
+  /* Accent Colors - adjusted for dark backgrounds */
+  --color-success: #34D399;
+  --color-success-light: #064E3B;
+  --color-warning: #EF4444;
+  --color-warning-light: #3B1111;
+  --color-info: #38BDF8;
+  --color-info-light: #0C4A6E;
+  --color-amber: #FBBF24;
+  --color-amber-light: #78350F;
+
+  /* Backgrounds */
+  --bg-cream: #111318;
+  --bg-warm: #111318;
+  --bg-card: #1A1D23;
+  --bg-sidebar: #151820;
+
+  /* Shadows - stronger for dark mode */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.3);
+
+  /* Overlay */
+  --color-backdrop: rgba(0, 0, 0, 0.7);
+  --color-backdrop-light: rgba(0, 0, 0, 0.6);
+
+  /* Text on colored backgrounds */
+  --color-on-primary: white;
+  --color-on-accent: white;
+
+  /* Misc */
+  --color-select-arrow: %239CA3AF;
+  --color-danger-hover: #DC2626;
+  --color-tag-remove-bg: rgba(255, 255, 255, 0.15);
 }
 
 html {
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 body {
@@ -101,6 +183,15 @@ h1, h2, h3, h4, h5, h6 {
 :focus-visible {
   outline: 2px solid var(--color-primary-500);
   outline-offset: 2px;
+}
+
+/* Select arrow icon - uses CSS variable for theme support */
+.select-input {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2378716C' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
+
+[data-theme="dark"] .select-input {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
 }
 
 /* Scrollbar styling */
@@ -225,7 +316,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .tag-remove:hover {
   opacity: 1;
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: var(--color-tag-remove-bg);
 }
 
 .new-tag-input {
@@ -377,7 +468,7 @@ h1, h2, h3, h4, h5, h6 {
     display: none;
     position: fixed;
     inset: 0;
-    background-color: rgba(28, 25, 23, 0.4);
+    background-color: var(--color-backdrop-light);
     z-index: 250;
   }
 

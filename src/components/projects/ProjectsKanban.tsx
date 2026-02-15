@@ -110,7 +110,7 @@ export function ProjectsKanban({ projects }: ProjectsKanbanProps) {
                     to={`/projects/${project.id}`}
                     style={{
                       display: 'block',
-                      backgroundColor: 'white',
+                      backgroundColor: 'var(--bg-card)',
                       borderRadius: 'var(--radius-md)',
                       padding: '12px',
                       textDecoration: 'none',

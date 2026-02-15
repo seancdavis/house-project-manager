@@ -325,6 +325,8 @@ function TaskItem({
             border: '1px solid var(--color-primary-300)',
             borderRadius: 'var(--radius-sm)',
             fontFamily: 'var(--font-body)',
+            backgroundColor: 'var(--bg-card)',
+            color: 'var(--color-stone-800)',
             outline: 'none',
           }}
         />
