@@ -2,7 +2,7 @@ import type { Context } from '@netlify/functions';
 import { getStore } from '@netlify/blobs';
 import { eq } from 'drizzle-orm';
 import { db } from '../../db';
-import { photos, activities } from '../../db/schema';
+import { photos, projects, activities } from '../../db/schema';
 
 const STORE_NAME = 'project-photos';
 
@@ -46,6 +46,11 @@ export default async (req: Request, context: Context) => {
       // Delete from database
       await db.delete(photos).where(eq(photos.id, photoId));
 
+      // Touch parent project's updatedAt
+      await db.update(projects)
+        .set({ updatedAt: new Date() })
+        .where(eq(projects.id, photo.projectId));
+
       // Record activity
       await db.insert(activities).values({
         action: 'deleted',
@@ -84,6 +89,11 @@ export default async (req: Request, context: Context) => {
           headers
         });
       }
+
+      // Touch parent project's updatedAt
+      await db.update(projects)
+        .set({ updatedAt: new Date() })
+        .where(eq(projects.id, updated.projectId));
 
       // Record activity
       await db.insert(activities).values({

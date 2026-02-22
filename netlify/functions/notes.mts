@@ -1,7 +1,7 @@
 import type { Context } from '@netlify/functions';
 import { eq, desc, and, isNull, or } from 'drizzle-orm';
 import { db } from '../../db';
-import { notes, members, activities, tasks } from '../../db/schema';
+import { notes, members, projects, activities, tasks } from '../../db/schema';
 
 export default async (req: Request, context: Context) => {
   const headers = { 'Content-Type': 'application/json' };
@@ -94,6 +94,13 @@ export default async (req: Request, context: Context) => {
       content: body.content.trim(),
       authorId: body.authorId || null,
     }).returning();
+
+    // Touch parent project's updatedAt
+    if (newNote.projectId) {
+      await db.update(projects)
+        .set({ updatedAt: new Date() })
+        .where(eq(projects.id, newNote.projectId));
+    }
 
     // Record activity - look up projectId from task if needed
     const notePreview = newNote.content.length > 50

@@ -61,13 +61,54 @@ export const PROJECT_FILTER_DEFAULTS: ProjectFilters = {
   status: undefined,
   type: undefined,
   owner: undefined,
-  sort: 'createdAt',
+  sort: 'updatedAt',
   order: 'desc',
   view: 'cards',
 };
 
-export function useProjectFilters() {
-  return useUrlState<ProjectFilters>(PROJECT_FILTER_DEFAULTS);
+const PROJECT_SORT_STORAGE_KEY = 'house-project-manager-sort';
+
+function getStoredSortPrefs(): { sort?: string; order?: string } {
+  try {
+    const stored = localStorage.getItem(PROJECT_SORT_STORAGE_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch {
+    // Ignore parse errors
+  }
+  return {};
+}
+
+function persistSortPrefs(sort: string | undefined, order: string | undefined) {
+  try {
+    localStorage.setItem(PROJECT_SORT_STORAGE_KEY, JSON.stringify({ sort, order }));
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+export function useProjectFilters(): [ProjectFilters, (updates: Partial<ProjectFilters>) => void, () => void] {
+  const storedPrefs = useMemo(() => getStoredSortPrefs(), []);
+  const defaults = useMemo(() => ({
+    ...PROJECT_FILTER_DEFAULTS,
+    sort: storedPrefs.sort || PROJECT_FILTER_DEFAULTS.sort,
+    order: storedPrefs.order || PROJECT_FILTER_DEFAULTS.order,
+  }), [storedPrefs]);
+
+  const [filters, setFiltersRaw, resetFilters] = useUrlState<ProjectFilters>(defaults);
+
+  const setFilters = useCallback((updates: Partial<ProjectFilters>) => {
+    setFiltersRaw(updates);
+    // Persist sort preferences to localStorage when they change
+    if (updates.sort !== undefined || updates.order !== undefined) {
+      const newSort = updates.sort ?? filters.sort ?? defaults.sort;
+      const newOrder = updates.order ?? filters.order ?? defaults.order;
+      persistSortPrefs(newSort, newOrder);
+    }
+  }, [setFiltersRaw, filters.sort, filters.order, defaults.sort, defaults.order]);
+
+  return [filters, setFilters, resetFilters];
 }
 
 // Type-safe member list filters

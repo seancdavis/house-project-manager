@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useMembers } from '../../hooks/useMembers';
+import { formatRelativeTime } from '../../utils/formatRelativeTime';
 import { StatusBadge, TypeBadge, PriorityBadge, Avatar, Badge, TagBadge } from '../ui';
 import type { Project } from '../../types';
 
@@ -64,6 +65,9 @@ export function ProjectsTable({ projects }: ProjectsTableProps) {
               Target Date
             </th>
             <th style={{ padding: '12px 16px', fontWeight: 600, color: 'var(--color-stone-600)' }}>
+              Updated
+            </th>
+            <th style={{ padding: '12px 16px', fontWeight: 600, color: 'var(--color-stone-600)' }}>
               Budget
             </th>
           </tr>
@@ -124,6 +128,9 @@ export function ProjectsTable({ projects }: ProjectsTableProps) {
                 </td>
                 <td style={{ padding: '12px 16px', color: 'var(--color-stone-600)' }}>
                   {formatDate(project.targetDate)}
+                </td>
+                <td style={{ padding: '12px 16px', color: 'var(--color-stone-400)', fontSize: '0.8125rem' }}>
+                  {formatRelativeTime(project.updatedAt)}
                 </td>
                 <td style={{ padding: '12px 16px', color: 'var(--color-stone-600)' }}>
                   {formatBudget(project.estimatedBudget)}
