@@ -2,7 +2,7 @@ import type { Context } from '@netlify/functions';
 import { getStore } from '@netlify/blobs';
 import { eq, desc } from 'drizzle-orm';
 import { db } from '../../db';
-import { photos, activities } from '../../db/schema';
+import { photos, projects, activities } from '../../db/schema';
 
 const STORE_NAME = 'project-photos';
 
@@ -84,6 +84,11 @@ export default async (req: Request, context: Context) => {
         size: size || buffer.length,
         uploadedById: uploadedById || null,
       }).returning();
+
+      // Touch parent project's updatedAt
+      await db.update(projects)
+        .set({ updatedAt: new Date() })
+        .where(eq(projects.id, projectId));
 
       // Record activity
       await db.insert(activities).values({

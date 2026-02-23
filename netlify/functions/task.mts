@@ -1,7 +1,7 @@
 import type { Context } from '@netlify/functions';
 import { eq } from 'drizzle-orm';
 import { db } from '../../db';
-import { tasks, activities } from '../../db/schema';
+import { tasks, projects, activities } from '../../db/schema';
 
 export default async (req: Request, context: Context) => {
   const headers = { 'Content-Type': 'application/json' };
@@ -59,6 +59,11 @@ export default async (req: Request, context: Context) => {
       });
     }
 
+    // Touch parent project's updatedAt
+    await db.update(projects)
+      .set({ updatedAt: new Date() })
+      .where(eq(projects.id, updated.projectId));
+
     // Record activity - use 'completed' action if status changed to done
     const action = body.status === 'done' ? 'completed' : 'updated';
     await db.insert(activities).values({
@@ -93,6 +98,11 @@ export default async (req: Request, context: Context) => {
     }
 
     await db.delete(tasks).where(eq(tasks.id, id));
+
+    // Touch parent project's updatedAt
+    await db.update(projects)
+      .set({ updatedAt: new Date() })
+      .where(eq(projects.id, task.projectId));
 
     // Record activity
     await db.insert(activities).values({

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Calendar } from 'lucide-react';
 import { useMembers } from '../../hooks/useMembers';
+import { formatRelativeTime } from '../../utils/formatRelativeTime';
 import { TypeBadge, PriorityBadge, Avatar, Badge, TagBadge } from '../ui';
 import type { Project, ProjectStatus } from '../../types';
 
@@ -186,20 +187,30 @@ export function ProjectsKanban({ projects }: ProjectsKanbanProps) {
                       ) : (
                         <div />
                       )}
-                      {project.targetDate && (
-                        <div
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {project.targetDate && (
+                          <div
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              fontSize: '0.75rem',
+                              color: 'var(--color-stone-500)',
+                            }}
+                          >
+                            <Calendar size={12} />
+                            {formatDate(project.targetDate)}
+                          </div>
+                        )}
+                        <span
                           style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            fontSize: '0.75rem',
-                            color: 'var(--color-stone-500)',
+                            fontSize: '0.6875rem',
+                            color: 'var(--color-stone-400)',
                           }}
                         >
-                          <Calendar size={12} />
-                          {formatDate(project.targetDate)}
-                        </div>
-                      )}
+                          {formatRelativeTime(project.updatedAt)}
+                        </span>
+                      </div>
                     </div>
                   </Link>
                 );

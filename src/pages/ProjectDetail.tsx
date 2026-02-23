@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Edit2, Calendar, User, Wrench, DollarSign, Flag } from 'lucide-react';
+import { ArrowLeft, Edit2, Calendar, User, Wrench, DollarSign, Flag, Clock } from 'lucide-react';
 import { useProject, useUpdateProject, useDeleteProject } from '../hooks/useProjects';
 import { useMembers } from '../hooks/useMembers';
 import { useCurrentUser } from '../context/UserContext';
+import { formatRelativeTime } from '../utils/formatRelativeTime';
 import { ProjectForm } from '../components/projects/ProjectForm';
 import { TaskList } from '../components/tasks/TaskList';
 import { TaskDetailModal } from '../components/tasks/TaskDetailModal';
@@ -340,6 +341,22 @@ export function ProjectDetailPage() {
                   Completed {new Date(project.completedAt).toLocaleDateString()}
                 </div>
               )}
+
+              {/* Last updated */}
+              <div
+                style={{
+                  paddingTop: '16px',
+                  borderTop: '1px solid var(--color-stone-100)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontSize: '0.8125rem',
+                  color: 'var(--color-stone-400)',
+                }}
+              >
+                <Clock size={13} />
+                Updated {formatRelativeTime(project.updatedAt)}
+              </div>
             </div>
           </Card>
         </div>

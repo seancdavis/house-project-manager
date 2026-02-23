@@ -1,7 +1,7 @@
 import type { Context } from '@netlify/functions';
 import { eq } from 'drizzle-orm';
 import { db } from '../../db';
-import { notes, members, activities, tasks } from '../../db/schema';
+import { notes, members, projects, activities, tasks } from '../../db/schema';
 
 export default async (req: Request, context: Context) => {
   const headers = { 'Content-Type': 'application/json' };
@@ -37,6 +37,13 @@ export default async (req: Request, context: Context) => {
         status: 404,
         headers
       });
+    }
+
+    // Touch parent project's updatedAt
+    if (updated.projectId) {
+      await db.update(projects)
+        .set({ updatedAt: new Date() })
+        .where(eq(projects.id, updated.projectId));
     }
 
     // Record activity - resolve projectId from task if needed
@@ -94,6 +101,13 @@ export default async (req: Request, context: Context) => {
     }
 
     await db.delete(notes).where(eq(notes.id, noteId));
+
+    // Touch parent project's updatedAt
+    if (note.projectId) {
+      await db.update(projects)
+        .set({ updatedAt: new Date() })
+        .where(eq(projects.id, note.projectId));
+    }
 
     // Record activity - resolve projectId from task if needed
     const notePreview = note.content.length > 50

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
-import { Calendar, ArrowRight } from 'lucide-react';
+import { Calendar, ArrowRight, Clock } from 'lucide-react';
 import { useMembers } from '../../hooks/useMembers';
+import { formatRelativeTime } from '../../utils/formatRelativeTime';
 import { Card, StatusBadge, TypeBadge, Avatar, Badge, TagBadge } from '../ui';
 import type { Project } from '../../types';
 
@@ -99,6 +100,21 @@ export function ProjectCard({ project, compact = false }: ProjectCardProps) {
                 >
                   <span>Implementer:</span>
                   <span style={{ color: 'var(--color-stone-700)' }}>{implementer.name}</span>
+                </div>
+              )}
+
+              {project.updatedAt && (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontSize: '0.8125rem',
+                    color: 'var(--color-stone-400)',
+                  }}
+                >
+                  <Clock size={13} />
+                  <span>Updated {formatRelativeTime(project.updatedAt)}</span>
                 </div>
               )}
             </div>

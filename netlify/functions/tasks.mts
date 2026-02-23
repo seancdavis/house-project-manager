@@ -1,7 +1,7 @@
 import type { Context } from '@netlify/functions';
 import { eq, asc } from 'drizzle-orm';
 import { db } from '../../db';
-import { tasks, activities } from '../../db/schema';
+import { tasks, projects, activities } from '../../db/schema';
 
 export default async (req: Request, context: Context) => {
   const headers = { 'Content-Type': 'application/json' };
@@ -40,6 +40,11 @@ export default async (req: Request, context: Context) => {
         assigneeId: body.assigneeId,
         sortOrder: body.sortOrder ?? maxOrder + 1,
       }).returning();
+
+      // Touch parent project's updatedAt
+      await db.update(projects)
+        .set({ updatedAt: new Date() })
+        .where(eq(projects.id, projectId));
 
       // Record activity
       await db.insert(activities).values({

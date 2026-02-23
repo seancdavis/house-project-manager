@@ -1,7 +1,7 @@
 import type { Context } from '@netlify/functions';
 import { eq } from 'drizzle-orm';
 import { db } from '../../db';
-import { tasks } from '../../db/schema';
+import { tasks, projects } from '../../db/schema';
 
 export default async (req: Request, _context: Context) => {
   const headers = { 'Content-Type': 'application/json' };
@@ -25,10 +25,22 @@ export default async (req: Request, _context: Context) => {
     }
 
     // Update sortOrder for each task based on position
+    let projectId: string | null = null;
     for (let i = 0; i < body.taskIds.length; i++) {
-      await db.update(tasks)
+      const [updated] = await db.update(tasks)
         .set({ sortOrder: i, updatedAt: new Date() })
-        .where(eq(tasks.id, body.taskIds[i]));
+        .where(eq(tasks.id, body.taskIds[i]))
+        .returning();
+      if (updated && !projectId) {
+        projectId = updated.projectId;
+      }
+    }
+
+    // Touch parent project's updatedAt
+    if (projectId) {
+      await db.update(projects)
+        .set({ updatedAt: new Date() })
+        .where(eq(projects.id, projectId));
     }
 
     return new Response(JSON.stringify({ success: true }), { headers });
