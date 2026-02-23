@@ -67,7 +67,7 @@ export function ProjectsPage() {
     }
 
     // Apply sorting
-    const sortKey = filters.sort || 'createdAt';
+    const sortKey = filters.sort || 'updatedAt';
     const sortOrder = filters.order || 'desc';
 
     result.sort((a, b) => {
