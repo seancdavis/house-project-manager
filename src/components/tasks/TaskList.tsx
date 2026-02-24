@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Check, ListTodo, GripVertical, Edit2, Trash2 } from 'lucide-react';
+import { Plus, Check, ListTodo, GripVertical } from 'lucide-react';
 import {
   DndContext,
   closestCenter,
@@ -17,7 +17,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { useTasks, useCreateTask, useUpdateTask, useDeleteTask, useReorderTasks } from '../../hooks/useTasks';
+import { useTasks, useCreateTask, useUpdateTask, useReorderTasks } from '../../hooks/useTasks';
 import { useCurrentUser } from '../../context/UserContext';
 import { Input, Button, Loading, EmptyState } from '../ui';
 import type { Task, TaskStatus } from '../../types';
@@ -32,7 +32,6 @@ export function TaskList({ projectId, onTaskClick }: TaskListProps) {
   const { data: tasks, isLoading } = useTasks(projectId);
   const createTask = useCreateTask(projectId);
   const updateTask = useUpdateTask(projectId);
-  const deleteTask = useDeleteTask(projectId);
   const reorderTasks = useReorderTasks(projectId);
   const [newTaskTitle, setNewTaskTitle] = useState('');
 
@@ -59,16 +58,6 @@ export function TaskList({ projectId, onTaskClick }: TaskListProps) {
     if (!currentUser) return;
     const newStatus: TaskStatus = task.status === 'done' ? 'todo' : 'done';
     updateTask.mutate({ id: task.id, data: { status: newStatus } });
-  };
-
-  const handleDelete = (id: string) => {
-    if (!currentUser) return;
-    deleteTask.mutate(id);
-  };
-
-  const handleEditTask = (task: Task, newTitle: string) => {
-    if (!currentUser || !newTitle.trim()) return;
-    updateTask.mutate({ id: task.id, data: { title: newTitle.trim() } });
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -135,8 +124,6 @@ export function TaskList({ projectId, onTaskClick }: TaskListProps) {
                   key={task.id}
                   task={task}
                   onToggle={() => handleToggleStatus(task)}
-                  onDelete={() => handleDelete(task.id)}
-                  onEdit={(newTitle) => handleEditTask(task, newTitle)}
                   onClick={onTaskClick ? () => onTaskClick(task.id) : undefined}
                   disabled={!currentUser || reorderTasks.isPending}
                   style={{ animationDelay: `${index * 30}ms` }}
@@ -169,8 +156,6 @@ export function TaskList({ projectId, onTaskClick }: TaskListProps) {
               key={task.id}
               task={task}
               onToggle={() => handleToggleStatus(task)}
-              onDelete={() => handleDelete(task.id)}
-              onEdit={(newTitle) => handleEditTask(task, newTitle)}
               onClick={onTaskClick ? () => onTaskClick(task.id) : undefined}
               disabled={!currentUser}
               style={{ animationDelay: `${index * 30}ms` }}
@@ -185,8 +170,6 @@ export function TaskList({ projectId, onTaskClick }: TaskListProps) {
 interface TaskItemProps {
   task: Task;
   onToggle: () => void;
-  onDelete: () => void;
-  onEdit: (newTitle: string) => void;
   onClick?: () => void;
   disabled?: boolean;
   style?: React.CSSProperties;
@@ -224,37 +207,13 @@ function SortableTaskItem(props: Omit<TaskItemProps, 'dragHandleProps' | 'isDrag
 function TaskItem({
   task,
   onToggle,
-  onDelete,
-  onEdit,
   onClick,
   disabled,
   style,
   dragHandleProps,
   isDragging,
 }: TaskItemProps) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editTitle, setEditTitle] = useState(task.title);
   const isDone = task.status === 'done';
-
-  const handleSaveEdit = () => {
-    if (editTitle.trim() && editTitle.trim() !== task.title) {
-      onEdit(editTitle.trim());
-    }
-    setIsEditing(false);
-  };
-
-  const handleCancelEdit = () => {
-    setEditTitle(task.title);
-    setIsEditing(false);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSaveEdit();
-    } else if (e.key === 'Escape') {
-      handleCancelEdit();
-    }
-  };
 
   return (
     <div
@@ -314,102 +273,19 @@ function TaskItem({
         {isDone && <Check size={14} color="white" strokeWidth={3} />}
       </button>
 
-      {/* Title - editable */}
-      {isEditing ? (
-        <input
-          type="text"
-          value={editTitle}
-          onChange={(e) => setEditTitle(e.target.value)}
-          onBlur={handleSaveEdit}
-          onKeyDown={handleKeyDown}
-          autoFocus
-          style={{
-            flex: 1,
-            fontSize: '0.9375rem',
-            padding: '4px 8px',
-            border: '1px solid var(--color-primary-300)',
-            borderRadius: 'var(--radius-sm)',
-            fontFamily: 'var(--font-body)',
-            backgroundColor: 'var(--bg-card)',
-            color: 'var(--color-stone-800)',
-            outline: 'none',
-          }}
-        />
-      ) : (
-        <span
-          onClick={onClick}
-          style={{
-            flex: 1,
-            fontSize: '0.9375rem',
-            color: isDone ? 'var(--color-stone-400)' : 'var(--color-stone-700)',
-            textDecoration: isDone ? 'line-through' : 'none',
-            cursor: onClick ? 'pointer' : 'default',
-          }}
-        >
-          {task.title}
-        </span>
-      )}
-
-      {/* Action Buttons */}
-      {!disabled && !isEditing && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
-          {/* Edit button */}
-          {!isDone && (
-            <button
-              onClick={() => setIsEditing(true)}
-              style={{
-                background: 'none',
-                border: 'none',
-                padding: '6px',
-                cursor: 'pointer',
-                color: 'var(--color-stone-300)',
-                borderRadius: 'var(--radius-sm)',
-                transition: 'all var(--transition-fast)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = 'var(--color-primary-600)';
-                e.currentTarget.style.backgroundColor = 'var(--color-primary-50)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = 'var(--color-stone-300)';
-                e.currentTarget.style.backgroundColor = 'transparent';
-              }}
-            >
-              <Edit2 size={14} />
-            </button>
-          )}
-
-          {/* Delete Button */}
-          <button
-            onClick={onDelete}
-            style={{
-              background: 'none',
-              border: 'none',
-              padding: '6px',
-              cursor: 'pointer',
-              color: 'var(--color-stone-300)',
-              borderRadius: 'var(--radius-sm)',
-              transition: 'all var(--transition-fast)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = 'var(--color-warning)';
-              e.currentTarget.style.backgroundColor = 'var(--color-warning-light)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = 'var(--color-stone-300)';
-              e.currentTarget.style.backgroundColor = 'transparent';
-            }}
-          >
-            <Trash2 size={14} />
-          </button>
-        </div>
-      )}
+      {/* Title - click to open task modal */}
+      <span
+        onClick={onClick}
+        style={{
+          flex: 1,
+          fontSize: '0.9375rem',
+          color: isDone ? 'var(--color-stone-400)' : 'var(--color-stone-700)',
+          textDecoration: isDone ? 'line-through' : 'none',
+          cursor: onClick ? 'pointer' : 'default',
+        }}
+      >
+        {task.title}
+      </span>
     </div>
   );
 }
