@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { MessageSquare, Send, Edit2, Trash2, X, Check } from 'lucide-react';
 import { useProjectNotes, useTaskNotes, useCreateNote, useUpdateNote, useDeleteNote } from '../../hooks/useNotes';
 import { useCurrentUser } from '../../context/UserContext';
-import { Button, Avatar, EmptyState, Loading } from '../ui';
+import { Button, Avatar, EmptyState, Loading, Textarea } from '../ui';
 import type { Note } from '../../types';
 
 interface NotesSectionProps {
@@ -98,21 +98,14 @@ export function NotesSection({ projectId, taskId }: NotesSectionProps) {
               size="sm"
             />
             <div style={{ flex: 1 }}>
-              <textarea
+              <Textarea
                 value={newNote}
                 onChange={(e) => setNewNote(e.target.value)}
                 placeholder="Add a note..."
                 style={{
-                  width: '100%',
                   padding: '12px',
-                  border: '1px solid var(--color-stone-200)',
-                  borderRadius: 'var(--radius-md)',
-                  fontFamily: 'var(--font-body)',
                   fontSize: '0.9375rem',
-                  resize: 'vertical',
                   minHeight: '80px',
-                  backgroundColor: 'var(--bg-card)',
-                  color: 'var(--color-stone-800)',
                 }}
               />
               <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
@@ -217,20 +210,13 @@ export function NotesSection({ projectId, taskId }: NotesSectionProps) {
 
                 {editingId === note.id ? (
                   <div>
-                    <textarea
+                    <Textarea
                       value={editContent}
                       onChange={(e) => setEditContent(e.target.value)}
                       style={{
-                        width: '100%',
                         padding: '8px',
-                        border: '1px solid var(--color-stone-200)',
-                        borderRadius: 'var(--radius-sm)',
-                        fontFamily: 'var(--font-body)',
                         fontSize: '0.9375rem',
-                        resize: 'vertical',
                         minHeight: '60px',
-                        backgroundColor: 'var(--bg-card)',
-                        color: 'var(--color-stone-800)',
                       }}
                     />
                     <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
