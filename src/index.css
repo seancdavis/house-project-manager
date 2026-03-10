@@ -86,6 +86,10 @@
   --color-select-arrow: %2378716C;
   --color-danger-hover: #B91C1C;
   --color-tag-remove-bg: rgba(0, 0, 0, 0.1);
+
+  /* Button colors — kept dark so white text is always legible */
+  --color-btn-primary-bg: #2563EB;
+  --color-btn-primary-hover: #1D4ED8;
 }
 
 /* Dark Mode */
@@ -321,6 +325,12 @@ h1, h2, h3, h4, h5, h6 {
 
 .animate-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Ash editor wrapper */
+.ash-textarea-wrapper {
+  display: block;
+  width: 100%;
 }
 
 /* Tag Selector */

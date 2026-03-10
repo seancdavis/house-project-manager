@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Check, ListTodo, GripVertical } from 'lucide-react';
+import { Plus, Check, ListTodo, GripVertical, MessageSquare } from 'lucide-react';
 import {
   DndContext,
   closestCenter,
@@ -18,6 +18,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useTasks, useCreateTask, useUpdateTask, useReorderTasks } from '../../hooks/useTasks';
+import { useTaskNotes } from '../../hooks/useNotes';
 import { useCurrentUser } from '../../context/UserContext';
 import { Input, Button, Loading, EmptyState } from '../ui';
 import type { Task, TaskStatus } from '../../types';
@@ -167,6 +168,27 @@ export function TaskList({ projectId, onTaskClick }: TaskListProps) {
   );
 }
 
+function TaskNoteIndicator({ taskId }: { taskId: string }) {
+  const { data: notes } = useTaskNotes(taskId);
+  const count = notes?.length ?? 0;
+  if (count === 0) return null;
+  return (
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '3px',
+        fontSize: '0.75rem',
+        color: 'var(--color-stone-400)',
+        flexShrink: 0,
+      }}
+    >
+      <MessageSquare size={13} />
+      {count}
+    </span>
+  );
+}
+
 interface TaskItemProps {
   task: Task;
   onToggle: () => void;
@@ -286,6 +308,9 @@ function TaskItem({
       >
         {task.title}
       </span>
+
+      {/* Note indicator */}
+      <TaskNoteIndicator taskId={task.id} />
     </div>
   );
 }

@@ -14,7 +14,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantStyles: Record<ButtonVariant, React.CSSProperties> = {
   primary: {
-    backgroundColor: 'var(--color-primary-600)',
+    backgroundColor: 'var(--color-btn-primary-bg)',
     color: 'white',
     border: 'none',
   },
@@ -36,7 +36,7 @@ const variantStyles: Record<ButtonVariant, React.CSSProperties> = {
 };
 
 const hoverStyles: Record<ButtonVariant, React.CSSProperties> = {
-  primary: { backgroundColor: 'var(--color-primary-700)' },
+  primary: { backgroundColor: 'var(--color-btn-primary-hover)' },
   secondary: { backgroundColor: 'var(--color-stone-50)', borderColor: 'var(--color-stone-300)' },
   ghost: { backgroundColor: 'var(--color-stone-100)' },
   danger: { backgroundColor: 'var(--color-danger-hover)' },

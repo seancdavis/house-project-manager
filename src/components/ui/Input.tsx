@@ -1,5 +1,6 @@
 import type { InputHTMLAttributes, TextareaHTMLAttributes, SelectHTMLAttributes, ReactNode } from 'react';
 import { forwardRef } from 'react';
+import { Editor } from '@rocktree/ash';
 
 interface InputWrapperProps {
   label?: string;
@@ -71,10 +72,17 @@ export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputE
 );
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<HTMLTextAreaElement>>(
-  function Textarea({ style, ...props }, ref) {
+  function Textarea({ style, onChange, value, onFocus, onBlur, ...props }, ref) {
     return (
-      <textarea
+      <Editor
         ref={ref}
+        value={(value as string) ?? ''}
+        onChange={(newValue) => {
+          if (onChange) {
+            const event = { target: { value: newValue, name: props.name } } as React.ChangeEvent<HTMLTextAreaElement>;
+            onChange(event);
+          }
+        }}
         style={{
           ...inputBaseStyles,
           resize: 'vertical',
@@ -84,11 +92,14 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<H
         onFocus={(e) => {
           e.currentTarget.style.borderColor = 'var(--color-primary-500)';
           e.currentTarget.style.boxShadow = '0 0 0 3px var(--color-primary-100)';
+          onFocus?.(e);
         }}
         onBlur={(e) => {
           e.currentTarget.style.borderColor = 'var(--color-stone-200)';
           e.currentTarget.style.boxShadow = 'none';
+          onBlur?.(e);
         }}
+        wrapperClassName="ash-textarea-wrapper"
         {...props}
       />
     );
